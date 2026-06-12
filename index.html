@@ -3,164 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Route Productivity Dashboard - ANDROID SMOOTH EDITION</title>
+    <title>Tracking Sell Out Tuyến Chợ Truyền Thống</title>
     <style>
         /* =========================================================
-           1. CẤU HÌNH MÀU SẮC & GIAO DIỆN CHUNG
+           1. CẤU HÌNH MÀU SẮC & GIAO DIỆN CHUNG (GREEN THEME)
            ========================================================= */
         :root {
-            --b1:#E6F1FB; --b2:#B5D4F4; --b3:#85B7EB; --b4:#378ADD; --b5:#185FA5; --b6:#0C447C; --b7:#042C53;
-            --sidebar-width: 440px;
+            --primary: #059669; --primary-hover: #047857; --primary-light: #ecfdf5;
+            --background: #f8fafc; --card-bg: #ffffff; --text-main: #0f172a;
+            --text-muted: #475569; --border: #e2e8f0; --table-header: #f1f5f9;
         }
-        
+
         /* 🔥 Xóa hiệu ứng chớp xám khi chạm ngón tay trên Android 🔥 */
-        * { -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-        body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; background-color: #f0f4f8; color: var(--b7); font-size: 13px; overflow-x: hidden; }
-        .db-container { display: flex; min-height: 100vh; position: relative; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--background); color: var(--text-main); padding: 24px; line-height: 1.5; font-size: 13px; }
+        .container { width: 100%; max-width: 1400px; padding: 0 10px; margin: 0 auto; transition: all 0.3s ease; }
 
-        .overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 99; opacity: 0; transition: opacity 0.3s;
-        }
-        .overlay.show { display: block; opacity: 1; }
-
-        .sidebar {
-            width: var(--sidebar-width); flex-shrink: 0; background: white; padding: 20px; 
-            position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box;
-            z-index: 100; box-shadow: 2px 0 10px rgba(0,0,0,0.05);
-        }
-        
-        .resizer {
-            width: 6px; background: var(--b2); cursor: col-resize; 
-            position: sticky; top: 0; height: 100vh; z-index: 10; transition: background 0.2s;
-        }
-        .resizer:hover, .resizer.resizing { background: var(--b5); }
-
-        .header-wrap { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--b4); padding-bottom: 8px; margin-bottom: 5px; }
-        .sidebar-header { font-size: 14px; font-weight: 800; color: var(--b6); text-transform: uppercase; }
+        header { background: linear-gradient(135deg, #064e3b 0%, #059669 100%); color: white; padding: 24px 32px; border-radius: 16px; margin-bottom: 24px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;}
+        header h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; text-transform: uppercase;}
+        header p { color: #d1fae5; font-size: 13px; margin: 0;}
         
         .lang-toggle { display: flex; gap: 4px; }
         .lang-toggle button { 
-            border: 1px solid var(--b4); background: white; color: var(--b5); padding: 4px 8px; 
-            font-size: 10px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.2s;
+            border: 1px solid rgba(255,255,255,0.5); background: transparent; color: white; padding: 6px 12px; 
+            font-size: 11px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: 0.2s;
         }
-        .lang-toggle button.active { background: var(--b4); color: white; }
-
-        .top-filters { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .filter-item label { display: block; font-size: 10px; font-weight: 700; color: var(--b5); margin-bottom: 4px; text-transform: uppercase; }
-        
-        .ms-box { position: relative; width: 100%; border: 1px solid var(--b3); border-radius: 5px; background: white; cursor: pointer; }
-        .ms-label { padding: 9px; font-size: 12px; color: var(--b7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none; font-weight: 600;}
-        .ms-label::after { content: '▼'; float: right; font-size: 10px; color: var(--b5); margin-top: 2px;}
-        .ms-dropdown { position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid var(--b3); border-radius: 5px; z-index: 999; max-height: 250px; overflow-y: auto; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.15); padding: 5px 0; margin-top: 2px; overscroll-behavior: contain;}
-        .ms-opt { display: flex; align-items: center; padding: 10px 12px; font-size: 12px; cursor: pointer; color: var(--b7); user-select: none; transition: 0.2s;}
-        .ms-opt:hover { background: var(--b1); }
-        .ms-opt.selected { background: var(--b4); color: white; font-weight: bold; }
-
-        .personnel-filters { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex-grow: 1; overflow: hidden; margin-top: 5px; }
-        .list-container { display: flex; flex-direction: column; height: 100%; border: 1px solid var(--b2); border-radius: 6px; overflow: hidden; }
-        .list-label { font-size: 11px; font-weight: 700; color: white; background: var(--b5); padding: 12px; text-align: center; }
-        .scroll-list { overflow-y: auto; flex-grow: 1; background: #fff; overscroll-behavior-y: contain; } /* Ngăn chặn vuốt danh sách làm giật cả trang web trên Android */
-        .list-item { padding: 12px 14px; border-bottom: 1px solid #f1f5f9; cursor: pointer; font-size: 11px; transition: 0.2s; user-select: none;}
-        .list-item:hover { background: var(--b1); }
-        .list-item.selected { background: var(--b4); color: white; font-weight: 600; }
-
-        .main-content { flex: 1; min-width: 0; padding: 25px; overflow-y: auto; width: 100%; box-sizing: border-box; }
-        
-        .menu-btn {
-            display: none; background: var(--b6); color: white; border: none; padding: 12px 16px; 
-            font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; margin-bottom: 20px; 
-            align-items: center; gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; justify-content: center;
-        }
-
-        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
-        .kpi-card { background: white; border-radius: 10px; padding: 18px; border: 1px solid var(--b2); text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);}
-        .kpi-card .label { font-size: 11px; color: var(--b5); font-weight: 700; margin-bottom: 10px; text-transform: uppercase; }
-        .kpi-card .value { font-size: 20px; font-weight: 800; color: var(--b7); }
-        .kpi-card .sub { font-size: 11px; color: var(--b3); margin-top: 6px; font-weight: 600; text-transform: none; }
-
-        .chart-box { background: white; border: 1px solid var(--b2); border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); max-width: 100%; box-sizing: border-box; }
-        .chart-title { font-size: 14px; font-weight: 700; color: var(--b6); margin-bottom: 6px; display: flex; align-items: center; text-transform: uppercase; }
-        .chart-title::before { content: ""; display: inline-block; width: 4px; height: 18px; background: var(--b4); margin-right: 10px; }
-        .chart-subtitle { font-size: 12px; font-weight: 600; color: #16a34a; margin-bottom: 25px; padding-left: 14px; text-transform: uppercase; font-style: italic; }
-        
-        /* 🔥 CHỐNG TRƯỢT NHẦM KHI VUỐT BẢNG NGANG TRÊN ANDROID 🔥 */
-        .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--b2); margin-top: 15px; width: 100%; display: block; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; padding-bottom: 5px; }
-        .data-table { width: 100%; border-collapse: collapse; background: white; font-size: 12px; min-width: 800px; } 
-        .data-table th { background: var(--b5); color: white; padding: 12px; border: 1px solid rgba(255,255,255,0.1); white-space: nowrap; }
-        .data-table td { padding: 10px 12px; border: 1px solid #f1f5f9; text-align: center; line-height: 1.4; white-space: nowrap; }
-        .label-cell { background: var(--b1); color: var(--b6); font-weight: 800; text-align: left !important; width: 160px; position: sticky; left: 0; z-index: 2; }
-        .no-select { user-select: none; }
-
-        .segment-table { width:100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; background: white; min-width: 800px; }
-        .segment-table th { padding: 10px; border: 1px solid var(--b2); white-space: nowrap; }
-        .segment-table td { padding: 8px 10px; border: 1px solid #e2e8f0; text-align: center; white-space: nowrap; }
-        .seg-area-cell { background-color: #f8fafc; font-weight: bold; text-align: left !important; color: var(--b6); border-right: 2px solid var(--b3) !important; position: sticky; left: 0; z-index: 2;}
-        .seg-name-cell { text-align: left !important; font-weight: 600; color: #475569; position: sticky; left: 0; background: white; z-index: 1; }
+        .lang-toggle button.active { background: white; color: var(--primary); }
 
         /* =========================================================
-           🔥 GIAO DIỆN TƯƠNG THÍCH ĐIỆN THOẠI (MOBILE RESPONSIVE) 🔥
+           2. KHU VỰC BỘ LỌC ĐA DỮ LIỆU (MULTI-SELECT FILTERS)
            ========================================================= */
-        @media screen and (max-width: 768px) {
-            .menu-btn { display: flex; } 
-            
-            .sidebar {
-                position: fixed; top: 0; left: -100%; 
-                width: 85% !important; max-width: 380px; height: 100vh;
-                transition: left 0.3s ease; 
-            }
-            .sidebar.open { left: 0; } 
-            .resizer { display: none; }
-            .top-filters { grid-template-columns: 1fr 1fr; }
-            .personnel-filters { height: auto; min-height: 350px; }
+        .filter-card { background: var(--card-bg); padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border: 1px solid var(--border); display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .filter-group { display: flex; flex-direction: column; gap: 6px; }
+        .filter-label { font-weight: 700; color: var(--text-muted); font-size: 11px; text-transform: uppercase; }
+        
+        .ms-box { position: relative; width: 100%; border: 1px solid var(--border); border-radius: 8px; background: white; cursor: pointer; transition: 0.2s; }
+        .ms-box:hover { border-color: var(--primary); }
+        .ms-label { padding: 10px 14px; font-size: 13px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none; font-weight: 600;}
+        .ms-label::after { content: '▼'; float: right; font-size: 10px; color: var(--text-muted); margin-top: 2px;}
+        .ms-dropdown { position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid var(--border); border-radius: 8px; z-index: 999; max-height: 250px; overflow-y: auto; display: none; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); padding: 5px 0; margin-top: 4px; overscroll-behavior: contain;}
+        .ms-opt { display: flex; align-items: center; padding: 10px 14px; font-size: 13px; cursor: pointer; color: var(--text-main); user-select: none; transition: 0.2s;}
+        .ms-opt:hover { background: var(--primary-light); }
+        .ms-opt.selected { background: var(--primary); color: white; font-weight: bold; }
 
-            .main-content { padding: 10px; width: 100%; }
-            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-            #segmentKpiContainer { grid-template-columns: 1fr 1fr 1fr !important; } 
-            .chart-box { padding: 12px; margin-bottom: 15px;}
+        .personnel-card { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 24px; height: 250px; }
+        .list-container { display: flex; flex-direction: column; height: 100%; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);}
+        .list-label { font-size: 11px; font-weight: 700; color: white; background: var(--primary); padding: 12px; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;}
+        .scroll-list { overflow-y: auto; flex-grow: 1; background: #fff; overscroll-behavior-y: contain; } 
+        .list-item { padding: 12px 14px; border-bottom: 1px solid var(--border); cursor: pointer; font-size: 12px; transition: 0.2s; user-select: none; color: var(--text-main);}
+        .list-item:hover { background: var(--primary-light); }
+        .list-item.selected { background: var(--primary); color: white; font-weight: 600; }
 
-            .label-cell, .seg-area-cell, .seg-name-cell { position: relative; left: auto; z-index: 1; }
+        /* =========================================================
+           3. KHU VỰC BẢNG DỮ LIỆU CHÍNH
+           ========================================================= */
+        .dashboard-row { display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px; }
+        @media (min-width: 1200px) { .row-2-col { grid-template-columns: 1fr 1fr; } }
+
+        .section-card { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden; }
+        .section-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; border-left: 4px solid var(--primary); padding-left: 12px; text-transform: uppercase;}
+
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid var(--border); padding-bottom: 4px;}
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
+        th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        th { background-color: var(--table-header); color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; }
+        tbody tr:hover { background-color: var(--primary-light); }
+        
+        .first-col-sticky { font-weight: 600; color: var(--text-main); background-color: #fff; position: sticky; left: 0; z-index: 2; box-shadow: 2px 0 5px rgba(0,0,0,0.03); }
+        th.first-col-sticky { background-color: var(--table-header); z-index: 3;}
+        
+        .text-right { text-align: right; } .text-center { text-align: center; } .text-left { text-align: left; }
+        .empty-row { color: var(--text-muted); font-style: italic; text-align: center; padding: 20px; }
+        .badge { background-color: var(--primary-light); color: var(--primary); padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 10px; text-transform: none;}
+
+        /* =========================================================
+           🔥 MOBILE RESPONSIVE
+           ========================================================= */
+        @media (max-width: 1024px) { 
+            .row-2-col { grid-template-columns: 1fr; } 
+            .filter-card { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) { 
+            body { padding: 12px; } 
+            header { padding: 20px; flex-direction: column; align-items: flex-start; gap: 10px;} 
+            header h1 { font-size: 20px; } 
+            .personnel-card { grid-template-columns: 1fr; height: auto; min-height: 400px;}
+            .first-col-sticky { position: relative; left: auto; box-shadow: none; z-index: 1;}
         }
     </style>
 </head>
 <body>
-
-<div class="db-container">
-    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
-
-    <div class="sidebar" id="sidebar">
-        <div class="header-wrap">
-            <div class="sidebar-header" data-i18n="sysTitle">WEEKLY ROUTE PRODUCTIVITIES REPORT</div>
+    <div class="container">
+        <header>
+            <div>
+                <h1 data-i18n="sysTitle">Tracking Sell Out Tuyến Chợ Truyền Thống</h1>
+                <p data-i18n="sysSub">Hệ thống báo cáo hiệu suất bán hàng, đối chiếu danh mục tuyến MCP độc lập</p>
+            </div>
             <div class="lang-toggle">
                 <button id="btn-vi" onclick="setLang('vi')" class="active">VI</button>
                 <button id="btn-en" onclick="setLang('en')">EN</button>
             </div>
-        </div>
-        
-        <div class="top-filters">
-            <div class="filter-item">
+        </header>
+
+        <div class="filter-card">
+            <div class="filter-group">
                 <label data-i18n="fMonth">Tháng</label>
                 <div class="ms-box" onclick="toggleMS('month')">
                     <div class="ms-label" id="lbl-month">Tất cả</div>
                     <div class="ms-dropdown" id="drop-month" onclick="event.stopPropagation()"></div>
                 </div>
             </div>
-            <div class="filter-item">
+            <div class="filter-group">
                 <label data-i18n="fWeek">Tuần</label>
                 <div class="ms-box" onclick="toggleMS('week')">
                     <div class="ms-label" id="lbl-week">Tất cả</div>
                     <div class="ms-dropdown" id="drop-week" onclick="event.stopPropagation()"></div>
                 </div>
             </div>
-            <div class="filter-item">
+            <div class="filter-group">
                 <label data-i18n="fRegion">Miền</label>
                 <div class="ms-box" onclick="toggleMS('hq')">
                     <div class="ms-label" id="lbl-hq">Tất cả</div>
                     <div class="ms-dropdown" id="drop-hq" onclick="event.stopPropagation()"></div>
                 </div>
             </div>
-            <div class="filter-item">
+            <div class="filter-group">
                 <label data-i18n="fArea">Khu vực</label>
                 <div class="ms-box" onclick="toggleMS('area')">
                     <div class="ms-label" id="lbl-area">Tất cả</div>
@@ -169,673 +137,609 @@
             </div>
         </div>
 
-        <div class="personnel-filters">
+        <div class="personnel-card">
             <div class="list-container">
-                <div class="list-label">KAM</div>
+                <div class="list-label" data-i18n="lblKam">KAM (Auto Mapped)</div>
                 <div class="scroll-list" id="kamList"></div>
             </div>
             <div class="list-container">
-                <div class="list-label">KAE / DSR</div>
+                <div class="list-label" data-i18n="lblKae">DSR / KAE</div>
                 <div class="scroll-list" id="kaeList"></div>
             </div>
         </div>
+
+        <div class="dashboard-row row-2-col">
+            <div class="section-card">
+                <h3 data-i18n="titleDaily">Daily Tracking <span class="badge" data-i18n="badgeDaily">Tuyến: MCP Gốc | Tổng: Lọc trùng toàn tuần</span></h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr id="head-daily"></tr>
+                        </thead>
+                        <tbody id="tb-daily"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <h3 data-i18n="titleWeekly">Weekly Tracking <span class="badge" style="background-color: #fef08a; color: #854d0e;" data-i18n="badgeWeekly">Tổng Tháng: Lọc trùng khớp 100% với Monthly</span></h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr id="head-weekly"></tr>
+                        </thead>
+                        <tbody id="tb-weekly"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-row">
+            <div class="section-card">
+                <h3 data-i18n="titleMonthly">Monthly Tracking <span class="badge" data-i18n="badgeMonthly">Theo Tháng</span></h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr id="head-monthly"></tr>
+                        </thead>
+                        <tbody id="tb-monthly"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-row">
+            <div class="section-card">
+                <h3 data-i18n="titleOverview">Overview Địa Bàn Quận / Huyện</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="first-col-sticky" data-i18n="colDistrict">Quận / Huyện</th>
+                                <th class="text-right" data-i18n="colMinD">Số lượng chợ (MinD)</th>
+                                <th class="text-right" data-i18n="colCovM">Chợ Covered thực tế</th>
+                                <th class="text-right" style="color:var(--primary);" data-i18n="colSRM">Strike Rate Chợ</th>
+                                <th class="text-right" data-i18n="colCinD">Estimate Outlet (CinD)</th>
+                                <th class="text-right" data-i18n="colCovO">Active Outlet thực tế</th>
+                                <th class="text-right" style="color:var(--primary);" data-i18n="colSRO">Strike Rate Outlet</th>
+                                <th class="text-right" data-i18n="colTotalS">Doanh Số Tổng</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tb-overview"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-row">
+            <div class="section-card">
+                <h3 data-i18n="titleTopMarkets">Top 20 Chợ Doanh Số Cao Nhất</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr id="head-top-markets"></tr>
+                        </thead>
+                        <tbody id="tb-top-markets"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-row">
+            <div class="section-card">
+                <h3 data-i18n="titleTopCus">Top 20 Khách Hàng Xuất Sắc</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr id="head-top-customers"></tr>
+                        </thead>
+                        <tbody id="tb-top-customers"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-row">
+            <div class="section-card">
+                <h3 data-i18n="titleTopSku">Sell-out By SKU (Danh mục Sản phẩm)</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr id="head-sku"></tr>
+                        </thead>
+                        <tbody id="tb-sku"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-    
-    <div class="resizer" id="dragMe"></div>
 
-    <main class="main-content">
-        <button class="menu-btn" onclick="toggleSidebar()">
-            ☰ HIỂN THỊ BỘ LỌC (FILTERS)
-        </button>
+    <script src="dbActive.js"></script> 
+    <script src="dbMarket.js"></script>
+    <script src="dataM5.js"></script>
+    <script>
+        // =========================================================
+        // 1. TỪ ĐIỂN ĐA NGÔN NGỮ & CONFIG CƠ BẢN
+        // =========================================================
+        const dict = {
+            vi: {
+                sysTitle: "Tracking Sell Out Tuyến Chợ Truyền Thống", sysSub: "Hệ thống báo cáo hiệu suất bán hàng, đối chiếu danh mục tuyến MCP độc lập",
+                fMonth: "Tháng", fWeek: "Tuần", fRegion: "Miền", fArea: "Khu vực", optAll: "Tất cả",
+                lblKam: "TẤT CẢ KAM", lblKae: "TẤT CẢ KAE/DSR",
+                titleDaily: "Daily Tracking", badgeDaily: "Tuyến: MCP Gốc | Tổng: Lọc trùng toàn tuần",
+                titleWeekly: "Weekly Tracking", badgeWeekly: "Tổng Tháng: Lọc trùng khớp 100% với Monthly",
+                titleMonthly: "Monthly Tracking", badgeMonthly: "Theo Tháng",
+                titleOverview: "Overview Địa Bàn Quận / Huyện", titleTopMarkets: "Top 20 Chợ Doanh Số Cao Nhất", 
+                titleTopCus: "Top 20 Khách Hàng Xuất Sắc", titleTopSku: "Sell-out By SKU (Danh mục Sản phẩm)",
+                colMetric: "Chỉ số", colTotalW: "Tổng Tuần", colTotalM: "Tổng Tháng", colTotal: "Tổng Cộng",
+                colDistrict: "Quận / Huyện", colMinD: "Số lượng chợ (Kế hoạch)", colCovM: "Chợ Covered thực tế", colSRM: "Strike Rate Chợ",
+                colCinD: "Estimate Outlet (Kế hoạch)", colCovO: "Active Outlet thực tế", colSRO: "Strike Rate Outlet", colTotalS: "Doanh Số Tổng",
+                colMarket: "Tên Chợ", colKae: "KAE Chăm Sóc", colCuscode: "Mã KH (Cuscode)", colCusname: "Tên Khách Hàng", colBelongM: "Thuộc Chợ", colSku: "Tên Sản Phẩm (SKU)",
+                rowPlanM: "Số lượng Chợ chăm sóc (Kế hoạch)", rowActM: "Số lượng Chợ có đơn hàng (Thực tế)", rowSRM: "Tỷ lệ bao phủ Chợ",
+                rowPlanO: "Số lượng Khách hàng trên tuyến", rowActO: "Số lượng Khách hàng lên đơn", rowSRO: "Tỷ lệ lên đơn (Strike Rate)", rowSales: "Doanh số",
+                days: ["T2", "T3", "T4", "T5", "T6", "T7"], noData: "Không có dữ liệu tương ứng bộ lọc"
+            },
+            en: {
+                sysTitle: "Traditional Market Sell Out Tracking", sysSub: "Sales performance reporting system, independent MCP routing sync",
+                fMonth: "Month", fWeek: "Week", fRegion: "Region", fArea: "Area", optAll: "All",
+                lblKam: "ALL KAMs", lblKae: "ALL KAE/DSRs",
+                titleDaily: "Daily Tracking", badgeDaily: "Route: Original MCP | Total: De-duplicated weekly",
+                titleWeekly: "Weekly Tracking", badgeWeekly: "Total Month: 100% matched with Monthly",
+                titleMonthly: "Monthly Tracking", badgeMonthly: "By Month",
+                titleOverview: "District Overview", titleTopMarkets: "Top 20 Markets by Sales", 
+                titleTopCus: "Top 20 Outstanding Customers", titleTopSku: "Sell-out By SKU",
+                colMetric: "Metric", colTotalW: "Week Total", colTotalM: "Month Total", colTotal: "Grand Total",
+                colDistrict: "District", colMinD: "Planned Markets", colCovM: "Covered Markets", colSRM: "Market Strike Rate",
+                colCinD: "Estimate Outlets (Planned)", colCovO: "Active Outlets", colSRO: "Outlet Strike Rate", colTotalS: "Total Sales",
+                colMarket: "Market Name", colKae: "KAE in charge", colCuscode: "Cuscode", colCusname: "Customer Name", colBelongM: "Belongs to", colSku: "Product (SKU)",
+                rowPlanM: "Number of Planned Markets", rowActM: "Number of Active Markets", rowSRM: "Market Coverage Rate",
+                rowPlanO: "Number of Planned Customers", rowActO: "Number of Active Customers", rowSRO: "Customer Strike Rate", rowSales: "Sales Revenue",
+                days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], noData: "No data matches filters"
+            }
+        };
 
-        <div class="kpi-grid">
-            <div class="kpi-card"><div class="label" data-i18n="kpiSales">DOANH SỐ</div><div class="value" id="val-sales">0</div><div class="sub" data-i18n="kpiSalesSub">VNĐ (Chưa VAT)</div></div>
-            <div class="kpi-card"><div class="label" data-i18n="kpiTotal">TỔNG KH TRÊN TUYẾN</div><div class="value" id="val-cust">0</div><div class="sub" data-i18n="kpiTotalSub">khách hàng</div></div>
-            <div class="kpi-card"><div class="label" data-i18n="kpiActive">KH ACTIVE</div><div class="value" id="val-strike">0</div><div class="sub" data-i18n="kpiActiveSub">khách hàng</div></div>
-            <div class="kpi-card"><div class="label" data-i18n="kpiStrike">STRIKE RATE</div><div class="value" id="val-strike-rate">0%</div><div class="sub" data-i18n="kpiStrikeSub">Tỷ lệ KH Active / Tổng</div></div>
-        </div>
+        const monthOrder = { "jan":1, "feb":2, "mar":3, "apr":4, "may":5, "jun":6, "jul":7, "aug":8, "sep":9, "oct":10, "nov":11, "dec":12, "tháng 1":1, "tháng 2":2, "tháng 3":3, "tháng 4":4, "tháng 5":5, "tháng 6":6 };
+        
+        let lang = 'vi';
+        let filters = { month: [], week: [], hq: [], area: [], kam: [], kae: [] };
+        let dbMaster = []; let dbSales = []; let targetMonths = []; let targetWeeks = [];
+        let districtUniverse = {}; // { "Bình Chánh": { minD: 10, cinD: 150 } }
 
-        <div class="chart-box">
-            <div class="chart-title" data-i18n="cAreaTitle">HIỆU SUẤT THEO KHU VỰC (AREA)</div>
-            <div class="chart-subtitle" id="sub-area"></div>
-            <div style="height: 380px;"><canvas id="areaChart"></canvas></div>
-            <div class="table-wrap"><table class="data-table"><thead><tr id="areaHeaderRow"></tr></thead><tbody id="areaTableBody"></tbody></table></div>
-        </div>
+        const t = (key) => dict[lang][key] || key;
+        const fmt = (n) => new Intl.NumberFormat('en-US').format(Math.round(n || 0));
+        const formatPct = (num, den) => (!den || den === 0) ? '0.0%' : ((num / den) * 100).toFixed(1) + '%';
+        const getW = (d) => String(d.w || "").toUpperCase().trim();
+        
+        // Hỗ trợ dịch tháng (May -> T5)
+        const formatM = (m) => {
+            if (!m) return '';
+            let mNum = monthOrder[String(m).toLowerCase()];
+            return (lang === 'vi' && mNum) ? `T${mNum}` : String(m).charAt(0).toUpperCase() + String(m).slice(1).toLowerCase();
+        };
 
-        <div class="chart-box">
-            <div class="chart-title" data-i18n="cSegmentTitle">PHÂN TÍCH HIỆU SUẤT THEO PHÂN KHÚC KHÁCH HÀNG (CUSTOMER SEGMENT BY AREA)</div>
-            <div class="chart-subtitle" id="sub-segment"></div>
-            <div class="kpi-grid" id="segmentKpiContainer" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 20px;"></div>
-            <div class="table-wrap" id="segmentAreaTableContainer"></div>
-        </div>
-
-        <div class="chart-box">
-            <div class="chart-title" data-i18n="cKamTitle">HIỆU SUẤT DOANH SỐ VÀ KHÁCH HÀNG BY KAM</div>
-            <div class="chart-subtitle" id="sub-kam"></div>
-            <div class="kpi-grid">
-                <div class="kpi-card"><div class="label" data-i18n="kamSales">TỔNG DOANH SỐ KAM</div><div class="value" id="kam-val-sales">0</div><div class="sub" data-i18n="kamSalesSub">VNĐ (Chưa VAT)</div></div>
-                <div class="kpi-card"><div class="label" data-i18n="kamContribArea">ĐÓNG GÓP DS CHO AREA</div><div class="value" id="kam-val-contrib-area">0%</div><div class="sub" data-i18n="kamContribAreaSub">% Doanh số Area</div></div>
-                <div class="kpi-card"><div class="label" data-i18n="kamContribNation">ĐÓNG GÓP DS CHO TOÀN QUỐC</div><div class="value" id="kam-val-contrib-nation">0%</div><div class="sub" data-i18n="kamContribNationSub">% Doanh số Toàn quốc</div></div>
-                <div class="kpi-card"><div class="label" data-i18n="kamBR">BUYING RATE BY KAM</div><div class="value" id="kam-val-buying-rate">0%</div><div class="sub" data-i18n="kamBRSub">Tỷ lệ KH Active / Tổng tuyến</div></div>
-            </div>
-            <div style="height: 380px;"><canvas id="kamChart"></canvas></div>
-            <div class="table-wrap"><table class="data-table"><thead><tr id="kamHeaderRow"></tr></thead><tbody id="kamTableBody"></tbody></table></div>
-        </div>
-
-        <div class="chart-box">
-            <div class="chart-title" data-i18n="cDayTitle">HIỆU SUẤT DOANH SỐ VÀ KHÁCH HÀNG BY KAE</div>
-            <div class="chart-subtitle" id="sub-kae"></div>
-            <div class="kpi-grid">
-                <div class="kpi-card"><div class="label" data-i18n="kaeSales">TỔNG DOANH SỐ KAE</div><div class="value" id="kae-val-sales">0</div><div class="sub" data-i18n="kamSalesSub">VNĐ (Chưa VAT)</div></div>
-                <div class="kpi-card"><div class="label" data-i18n="kaeContribArea">ĐÓNG GÓP DS CHO AREA</div><div class="value" id="kae-val-contrib-area">0%</div><div class="sub" data-i18n="kamSalesSub">% Doanh số Area</div></div>
-                <div class="kpi-card"><div class="label" data-i18n="kaeContribNation">ĐÓNG GÓP DS CHO TOÀN QUỐC</div><div class="value" id="kae-val-contrib-nation">0%</div><div class="sub" data-i18n="kamContribNationSub">% Doanh số Toàn quốc</div></div>
-                <div class="kpi-card"><div class="label" data-i18n="kaeBR">TỶ LỆ LÊN ĐƠN CỦA KHÁCH HÀNG</div><div class="value" id="kae-val-buying-rate">0%</div><div class="sub" data-i18n="kamBRSub">Tỷ lệ KH Active / Tổng tuyến</div></div>
-            </div>
-            <div style="height: 380px;"><canvas id="dayChart"></canvas></div>
-            <div class="table-wrap"><table class="data-table"><thead><tr id="dayHeaderRow"></tr></thead><tbody id="dayTableBody"></tbody></table></div>
-        </div>
-
-        <div class="chart-box">
-            <div class="chart-title" data-i18n="cWeekTitle">HIỆU SUẤT DOANH SỐ VÀ KHÁCH HÀNG THEO TUẦN</div>
-            <div class="chart-subtitle" id="sub-week"></div>
-            <div style="height: 380px;"><canvas id="weekChart"></canvas></div>
-            <div class="table-wrap"><table class="data-table"><thead><tr id="weekHeaderRow"></tr></thead><tbody id="weekTableBody"></tbody></table></div>
-        </div>
-    </main>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-
-<script src="dbMarket.js"></script>
-<script src="dataM5.js"></script>
-<script>
-const dict = {
-    vi: {
-        sysTitle: "HIỆU SUẤT TUYẾN BÁN HÀNG", fMonth: "Tháng", fWeek: "Tuần", fRegion: "Miền", fArea: "Khu vực", optAll: "Tất cả", 
-        allKam: "TẤT CẢ KAM", allKae: "TẤT CẢ KAE/DSR", kpiSales: "TỔNG SELL OUT", kpiSalesSub: "VNĐ (Chưa VAT)", 
-        kpiTotal: "TỔNG KH TRÊN TUYẾN", kpiTotalSub: "khách hàng", kpiActive: "Khách Active", kpiActiveSub: "khách hàng", 
-        kpiStrike: "Strike Rate", kpiStrikeSub: "Tỷ lệ KH Active / Tổng", cAreaTitle: "HIỆU SUẤT THEO KHU VỰC (AREA)", 
-        cSegmentTitle: "📊 PHÂN TÍCH HIỆU SUẤT THEO LOẠI TUYẾN (ROUTE CLASS BY AREA)",
-        cKamTitle: "HIỆU SUẤT DOANH SỐ VÀ KHÁCH HÀNG BY KAM", cDayTitle: "HIỆU SUẤT DOANH SỐ VÀ KHÁCH HÀNG BY KAE",
-        axisCust: "Đơn vị: Mã KH", axisVnd: "Đơn vị: VNĐ", legSales: "Doanh số", legTotal: "Tổng KH Kế Hoạch", legActive: "KH Active",
-        tblColArea: "Chỉ số / Khu vực", tblColKam: "Chỉ số / Ngày (KAM)", tblColDay: "Chỉ số / Ngày (KAE)",
-        rowRoute: "Tuyến", rowTotal: "KH Tuyến (Plan)", rowActive: "KH Lên đơn", rowSales: "Doanh số (VND)", rowSku: "SKU / Đơn (Avg)", rowStrike: "Strike Rate",
-        days: ["T2", "T3", "T4", "T5", "T6", "T7"], multiRoute: "Nhiều tuyến", noRoute: "Không có tuyến",
-        kamSales: "TỔNG SELL OUT KAM", kamSalesSub: "VNĐ (Chưa VAT)", kamBR: "TỶ LỆ LÊN ĐƠN CỦA TEAM", kamBRSub: "Tỷ lệ KH Active / Tổng tuyến",
-        kamContribArea: "ĐÓNG GÓP SELL OUT CHO AREA", kamContribAreaSub: "% Doanh số Area", kamContribNation: "ĐÓNG GÓP SELL OUT CHO TOÀN QUỐC", kamContribNationSub: "% Doanh số Toàn quốc",
-        kaeSales: "TỔNG SELL OUT KAE", kaeBR: "TỶ LỆ LÊN ĐƠN CỦA KHÁCH HÀNG DO KAE CHĂM SÓC", kaeContribArea: "ĐÓNG GÓP SELL OUT CỦA KAE CHO AREA", kaeContribNation: "ĐÓNG GÓP SELL OUT CỦA KAE CHO TOÀN QUỐC",
-        cWeekTitle: "HIỆU SUẤT DOANH SỐ VÀ KHÁCH HÀNG THEO TUẦN", cWeekSubtitle: "TỔNG HỢP DỮ LIỆU CÁC TUẦN", tblColWeek: "Chỉ số / Tuần",
-        segColClass: "Loại Tuyến (Route)", segColPlan: "KH Tuyến (Plan)", segColAct: "KH Lên Đơn (Active)", segColSR: "Strike Rate", segColSales: "Doanh số (VND)", segColAvg: "TB Doanh Số / KH Active"
-    },
-    en: {
-        sysTitle: "ROUTE PRODUCTIVITIES REPORT", fMonth: "Month", fWeek: "Week", fRegion: "Region", fArea: "Area", optAll: "All", 
-        allKam: "ALL KAMs", allKae: "ALL KAE/DSRs", kpiSales: "Total SELL OUT", kpiSalesSub: "VND (Excl. VAT)", 
-        kpiTotal: "ROUTE TOTAL CUS.", kpiTotalSub: "Customers", kpiActive: "Active Customers", kpiActiveSub: "Customers", 
-        kpiStrike: "Strike Rate", kpiStrikeSub: "Active / Total Ratio", cAreaTitle: "PERFORMANCE BY AREA", 
-        cSegmentTitle: "📊 ROUTE CLASS PRODUCTIVITY BY AREA",
-        cKamTitle: "SALES & CUSTOMER PERFORMANCE BY KAM", cDayTitle: "SALES & CUSTOMER PERFORMANCE BY KAE",
-        axisCust: "Unit: Cust. Codes", axisVnd: "Unit: VND", legSales: "Sales", legTotal: "Planned Cust.", legActive: "Active Cust.",
-        tblColArea: "Metric / Area", tblColKam: "Metric / Day (KAM)", tblColDay: "Metric / Day (KAE)",
-        rowRoute: "Route", rowTotal: "Planned Route Cust.", rowActive: "Ordered Cust.", rowSales: "Sales (VND)", rowSku: "Avg SKU / Invc", rowStrike: "Strike Rate",
-        days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], multiRoute: "Multiple", noRoute: "No route",
-        kamSales: "TOTAL SELL OUT BY KAM", kamSalesSub: "VND (Excl. VAT)", kamBR: "CUSTOMER BUYING RATE", kamBRSub: "Active / Total Route",
-        kamContribArea: "SELL OUT CONTRIBUTES TO AREA", kamContribAreaSub: "% Sales / Area", kamContribNation: "SELL OUT CONTRIBUTES TO NATIONWIDE", kamContribNationSub: "% Sales / Nationwide",
-        kaeSales: "TOTAL SELL OUT BY KAE", kaeBR: "CUSTOMER BUYING RATE", kaeContribArea: "KAE SELL OUT CONTRIBUTES TO AREA", kaeContribNation: "KAE SELL OUT CONTRIBUTES TO NATIONWIDE",
-        cWeekTitle: "WEEKLY SELL OUT SUMMARY", cWeekSubtitle: "WEEKLY DATA SUMMARY", tblColWeek: "Metric / Week",
-        segColClass: "Route Class", segColPlan: "Planned Cust.", segColAct: "Active Cust.", segColSR: "Strike Rate", segColSales: "Sales (VND)", segColAvg: "Avg Sales / Active Cust."
-    }
-};
-
-// Map Tên Phân Khúc theo mã viết tắt
-const segNames = { 'F4': 'Tuyến F4', 'F2-1': 'Tuyến F2-1 (Ghé thăm W1 & W3)', 'F2-2': 'Tuyến F2-2 (Ghé thăm W2 & W4)', 'N': 'Chưa Rõ Tuyến' };
-const segColors = { 'F4': '#16a34a', 'F2-1': '#2563eb', 'F2-2': '#ea580c', 'N': '#64748b' };
-const monthOrder = { "jan":1, "feb":2, "mar":3, "apr":4, "may":5, "jun":6, "jul":7, "aug":8, "sep":9, "oct":10, "nov":11, "dec":12, "tháng 1":1, "tháng 2":2, "tháng 3":3, "tháng 4":4, "tháng 5":5 };
-
-let lang = 'vi';
-let filters = { month: [], week: [], hq: [], area: [], kam: [], kae: [] };
-let charts = {};
-let dbMaster = []; let dbSales = [];
-
-const t = (key) => dict[lang][key] || key;
-const fmt = (n) => new Intl.NumberFormat('en-US').format(Math.round(n || 0));
-const getW = (d) => String(d.w || d.Week || "").toUpperCase().trim();
-
-const formatWM = (w, m) => {
-    if (!m) return w;
-    let mNum = monthOrder[String(m).toLowerCase()] || m;
-    let mName = m.charAt(0).toUpperCase() + m.slice(1).toLowerCase();
-    return lang === 'vi' ? `${w} T${mNum}` : `${w} ${mName}`;
-};
-
-// Hàm hỗ trợ getMarketInfo để lấy dữ liệu từ DB Market (Nối Area + Market)
-const getMarketInfo = (ar, m) => {
-    if (typeof dbMarket === 'undefined') return null;
-    let compKey = ar + "_" + m;
-    return dbMarket[compKey] || null;
-}
-
-const cleanName = (name) => {
-    let cleanStr = String(name || "").replace(/[✔️❌]/g, '').trim();
-    return cleanStr;
-};
-
-// Do chưa có cột KAM nên tạm ánh xạ trực tiếp từ KAE
-const deriveKam = (kaeName) => {
-    let cleanKae = cleanName(kaeName);
-    if (typeof kamMap !== 'undefined' && kamMap[cleanKae]) return kamMap[cleanKae]; 
-    return cleanKae; 
-}
-
-const buildStatusMap = (subset, key) => {
-    let map = {}; let isKamField = (key === 'kam');
-    for (let i = subset.length - 1; i >= 0; i--) {
-        let val = isKamField ? deriveKam(subset[i].k) : subset[i].k;
-        let clean = cleanName(val);
-        if (!map[clean]) {
-            let raw = String(val).trim();
-            let match = raw.match(/^[✔️❌]/);
-            map[clean] = match ? match[0] + ' ' + clean : clean;
+        const getMarketInfo = (ar, m) => {
+            if (typeof dbMarket === 'undefined') return null;
+            return dbMarket[ar + "_" + m] || null;
         }
-    }
-    return map;
-};
 
-const parseDay = (dayStr) => {
-    const d = String(dayStr).toLowerCase().trim();
-    if (d.includes("mon") || d === "t2" || d === "2") return 0;
-    if (d.includes("tue") || d === "t3" || d === "3") return 1;
-    if (d.includes("wed") || d === "t4" || d === "4") return 2;
-    if (d.includes("thu") || d === "t5" || d === "5") return 3;
-    if (d.includes("fri") || d === "t6" || d === "6") return 4;
-    if (d.includes("sat") || d === "t7" || d === "7") return 5;
-    return -1; 
-};
+        const cleanName = (name) => String(name || "").trim();
 
-const aggregateDualData = (masterSubset, salesSubset) => {
-    let masterSet = new Set();
-    masterSubset.forEach(d => { if (d.cc) masterSet.add(d.cc); });
-    let totalC = masterSet.size;
-
-    let sales = 0, skuLines = 0, invoiceCount = 0;
-    let salesSet = new Set();
-    
-    salesSubset.forEach(d => {
-        let currentSales = Number(d.s) || 0;
-        sales += currentSales; 
-        if (currentSales > 0) {
-            skuLines += 1; 
-            invoiceCount++; 
-            if (d.cc) salesSet.add(d.cc);
+        // 🚨 Logic Check DB Active MỚI: Truy xuất từ mảng dbActive thay vì cắt chuỗi
+        const getKaeStatus = (kaeName) => {
+            if (typeof dbActive === 'undefined' || !Array.isArray(dbActive)) return '';
+            let found = dbActive.find(x => cleanName(x.k) === cleanName(kaeName));
+            return found && found.ac ? found.ac : ''; // Trả về ✔️ hoặc ❌
         }
-    });
 
-    let activeC = salesSet.size;
-    let avgSku = invoiceCount > 0 ? (skuLines / invoiceCount) : 0;
-    return { s: sales, tc: totalC, ac: activeC, avgSku: avgSku };
-};
-
-function renderSegmentTable(masterSubset, salesSubset) {
-    let cusSegmentMap = {}; let uniqueMasterCus = new Set();
-    masterSubset.forEach(d => {
-        if (d.cc) {
-            cusSegmentMap[d.cc] = d.r ? String(d.r).toUpperCase().trim() : "N";
-            uniqueMasterCus.add(d.cc);
+        // Tạm thời map KAE lên KAM
+        const deriveKam = (kaeName) => {
+            let cleanKae = cleanName(kaeName);
+            if (typeof kamMap !== 'undefined' && kamMap[cleanKae]) return kamMap[cleanKae]; 
+            return cleanKae; 
         }
-    });
 
-    let globalSegCount = { 'F4': 0, 'F2-1': 0, 'F2-2': 0, 'N': 0 };
-    uniqueMasterCus.forEach(code => {
-        let seg = cusSegmentMap[code] || 'N';
-        if(globalSegCount[seg] !== undefined) globalSegCount[seg]++; else globalSegCount['N']++; 
-    });
+        const parseDay = (dayStr) => {
+            const d = String(dayStr).toLowerCase().trim();
+            if (d.includes("mon") || d === "t2" || d === "2") return 0;
+            if (d.includes("tue") || d === "t3" || d === "3") return 1;
+            if (d.includes("wed") || d === "t4" || d === "4") return 2;
+            if (d.includes("thu") || d === "t5" || d === "5") return 3;
+            if (d.includes("fri") || d === "t6" || d === "6") return 4;
+            if (d.includes("sat") || d === "t7" || d === "7") return 5;
+            return -1; 
+        };
 
-    let totalCus = uniqueMasterCus.size; let kpiHtml = ''; let segList = ['F4', 'F2-1', 'F2-2', 'N'];
-    segList.forEach(seg => {
-        let count = globalSegCount[seg]; let pct = totalCus > 0 ? ((count / totalCus) * 100).toFixed(1) + '%' : '0%';
-        let color = segColors[seg] || '#333'; let displayTitle = segNames[seg] || seg;
-        kpiHtml += `
-            <div class="kpi-card" style="padding: 12px; border-bottom: 4px solid ${color};">
-                <div class="label" style="color: ${color}; font-weight: 800;">${displayTitle}</div>
-                <div class="value" style="color: var(--b7); font-size: 18px;">${fmt(count)}</div>
-                <div class="sub" style="color: #64748b; font-size: 11px; margin-top: 4px;">Tỷ trọng: <b style="color: ${color};">${pct}</b></div>
-            </div>`;
-    });
-    const kpiContainer = document.getElementById('segmentKpiContainer');
-    if (kpiContainer) kpiContainer.innerHTML = kpiHtml;
+        // =========================================================
+        // 2. LOGIC BỘ LỌC ĐA DỮ LIỆU & UI UX
+        // =========================================================
+        function setLang(newLang) {
+            lang = newLang; 
+            document.getElementById('btn-vi').className = lang === 'vi' ? 'active' : ''; 
+            document.getElementById('btn-en').className = lang === 'en' ? 'active' : '';
+            document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n')); });
+            renderFilters(); renderDashboard();
+        }
 
-    let matrix = {};
-    masterSubset.forEach(d => {
-        let area = d.ar || "Unknown Area"; let code = d.cc; let seg = cusSegmentMap[code] || "N";
-        if (!matrix[area]) matrix[area] = {};
-        if (!matrix[area][seg]) matrix[area][seg] = { planSet: new Set(), activeSet: new Set(), salesSum: 0 };
-        if (code) matrix[area][seg].planSet.add(code);
-    });
-
-    salesSubset.forEach(d => {
-        let area = d.ar || "Unknown Area"; let code = d.cc;
-        if (!code) return;
-        let seg = cusSegmentMap[code] || "N";
-        if (!matrix[area]) matrix[area] = {};
-        if (!matrix[area][seg]) matrix[area][seg] = { planSet: new Set(), activeSet: new Set(), salesSum: 0 };
-        let currentSales = Number(d.s) || 0;
-        matrix[area][seg].salesSum += currentSales;
-        if (currentSales > 0) matrix[area][seg].activeSet.add(code);
-    });
-
-    let html = `<table class="segment-table"><thead><tr style="background-color: var(--b6); color: white;"><th rowspan="2" style="width:20%;">${lang==='vi'?'Khu vực (Area)':'Area'}</th><th rowspan="2" style="width:25%;">${t('segColClass')}</th><th colspan="5" style="padding:4px;">${lang==='vi'?'Chỉ số chi tiết phân khúc':'Segment Breakdown'}</th></tr><tr style="background-color: var(--b5); color: white;"><th style="width:11%;">${t('segColPlan')}</th><th style="width:11%;">${t('segColAct')}</th><th style="width:11%;">${t('segColSR')}</th><th style="width:11%;">${t('segColSales')}</th><th style="width:11%;">${t('segColAvg')}</th></tr></thead><tbody>`;
-
-    let sortedAreas = Object.keys(matrix).sort();
-    if(sortedAreas.length === 0) html += `<tr><td colspan="7" style="color:#999; padding:20px;">${lang==='vi'?'Không có dữ liệu phân khúc tương ứng bộ lọc':'No segment data matches filters'}</td></tr>`;
-
-    sortedAreas.forEach(area => {
-        let isFirst = true; let areaPlanCount = 0; let areaActCount = 0; let areaSalesSum = 0;
-        segList.forEach(seg => { let data = matrix[area][seg] || { planSet: new Set(), activeSet: new Set(), salesSum: 0 }; areaPlanCount += data.planSet.size; areaActCount += data.activeSet.size; areaSalesSum += data.salesSum; });
-
-        segList.forEach(seg => {
-            let data = matrix[area][seg] || { planSet: new Set(), activeSet: new Set(), salesSum: 0 };
-            let planCount = data.planSet.size; let actCount = data.activeSet.size;
-            let sr = planCount > 0 ? ((actCount / planCount) * 100).toFixed(1) + '%' : '0.0%';
-            let sales = data.salesSum; let avg = actCount > 0 ? Math.round(sales / actCount) : 0;
-            html += `<tr>`;
-            if (isFirst) { html += `<td rowspan="5" class="seg-area-cell">${area}</td>`; isFirst = false; }
-            html += `<td class="seg-name-cell">${segNames[seg] || seg}</td><td>${fmt(planCount)}</td><td style="color:green; font-weight:bold;">${fmt(actCount)}</td><td style="font-weight:bold;">${sr}</td><td style="text-align:right;">${fmt(sales)}</td><td style="text-align:right; color:var(--b5); font-weight:600;">${fmt(avg)}</td></tr>`;
+        let openMS = null;
+        function toggleMS(id) {
+            if(openMS && openMS !== id) document.getElementById('drop-'+openMS).style.display = 'none';
+            let drop = document.getElementById('drop-'+id);
+            if(drop.style.display === 'block') { drop.style.display = 'none'; openMS = null; } 
+            else { drop.style.display = 'block'; openMS = id; }
+        }
+        document.addEventListener('click', e => {
+            if(!e.target.closest('.ms-box')) { if(openMS) document.getElementById('drop-'+openMS).style.display = 'none'; openMS = null; }
         });
 
-        let areaSr = areaPlanCount > 0 ? ((areaActCount / areaPlanCount) * 100).toFixed(1) + '%' : '0.0%';
-        let areaAvg = areaActCount > 0 ? Math.round(areaSalesSum / areaActCount) : 0;
-        let txtTotal = lang === 'vi' ? 'TỔNG CỘNG' : 'TOTAL';
-
-        html += `<tr style="background-color: var(--b1); font-weight: bold; border-bottom: 2px solid var(--b3);"><td class="seg-name-cell" style="color: var(--b7);">${txtTotal}</td><td>${fmt(areaPlanCount)}</td><td style="color:green;">${fmt(areaActCount)}</td><td style="color:var(--b7);">${areaSr}</td><td style="text-align:right; color:var(--b7);">${fmt(areaSalesSum)}</td><td style="text-align:right; color:var(--b6);">${fmt(areaAvg)}</td></tr>`;
-    });
-    html += `</tbody></table>`;
-    document.getElementById('segmentAreaTableContainer').innerHTML = html;
-}
-
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); }
-
-function initResizer() {
-    const resizer = document.getElementById('dragMe'); let isResizing = false;
-    resizer.addEventListener('mousedown', function(e) { isResizing = true; document.body.classList.add('no-select'); resizer.classList.add('resizing'); });
-    document.addEventListener('mousemove', function(e) {
-        if (!isResizing) return; let newWidth = e.clientX;
-        if (newWidth < 250) newWidth = 250; if (newWidth > 700) newWidth = 700;
-        document.documentElement.style.setProperty('--sidebar-width', newWidth + 'px');
-    });
-    document.addEventListener('mouseup', function(e) { if (isResizing) { isResizing = false; document.body.classList.remove('no-select'); resizer.classList.remove('resizing'); } });
-}
-
-function setLang(newLang) {
-    lang = newLang; document.getElementById('btn-vi').className = lang === 'vi' ? 'active' : ''; document.getElementById('btn-en').className = lang === 'en' ? 'active' : '';
-    document.querySelectorAll('[data-i18n]').forEach(el => { el.innerText = t(el.getAttribute('data-i18n')); });
-    renderFilters(); render();
-}
-
-let openMS = null;
-function toggleMS(id) {
-    if(openMS && openMS !== id) document.getElementById('drop-'+openMS).style.display = 'none';
-    let drop = document.getElementById('drop-'+id);
-    if(drop.style.display === 'block') { drop.style.display = 'none'; openMS = null; } 
-    else { drop.style.display = 'block'; openMS = id; }
-}
-document.addEventListener('click', e => {
-    if(!e.target.closest('.ms-box')) { if(openMS) document.getElementById('drop-'+openMS).style.display = 'none'; openMS = null; }
-});
-
-function updateF(type, val) { 
-    if (val === 'all') { 
-        filters[type] = []; 
-        if (type === 'month') filters.week = [];
-        if (type === 'hq') filters.area = []; 
-        if (type === 'kam') filters.kae = []; 
-    } else {
-        let idx = filters[type].indexOf(val);
-        if (idx > -1) {
-            filters[type].splice(idx, 1); 
-        } else {
-            filters[type].push(val); 
-            if (type === 'week') {
-                let f = dbMaster.find(d => getW(d) === val) || dbSales.find(d => getW(d) === val);
-                if (f && f.mo && !filters.month.includes(f.mo)) filters.month.push(f.mo);
-            }
-            if (type === 'area') {
-                let f = dbMaster.find(d => d.ar === val) || dbSales.find(d => d.ar === val);
-                if (f && f.hq && !filters.hq.includes(f.hq)) filters.hq.push(f.hq);
-            }
-            if (type === 'kae') {
-                let f = dbMaster.find(d => cleanName(d.k) === val) || dbSales.find(d => cleanName(d.k) === val);
-                if (f && f.k) {
-                    let kName = cleanName(deriveKam(f.k));
-                    if (!filters.kam.includes(kName)) filters.kam.push(kName);
+        function updateF(type, val) { 
+            if (val === 'all') { 
+                filters[type] = []; 
+                if (type === 'month') filters.week = [];
+                if (type === 'hq') filters.area = []; 
+                if (type === 'kam') filters.kae = []; 
+            } else {
+                let idx = filters[type].indexOf(val);
+                if (idx > -1) filters[type].splice(idx, 1); 
+                else {
+                    filters[type].push(val); 
+                    if (type === 'week') {
+                        let f = dbMaster.find(d => getW(d) === val) || dbSales.find(d => getW(d) === val);
+                        if (f && f.mo && !filters.month.includes(f.mo)) filters.month.push(f.mo);
+                    }
+                    if (type === 'area') {
+                        let f = dbMaster.find(d => d.ar === val) || dbSales.find(d => d.ar === val);
+                        if (f && f.hq && !filters.hq.includes(f.hq)) filters.hq.push(f.hq);
+                    }
+                    if (type === 'kae') {
+                        let f = dbMaster.find(d => cleanName(d.k) === val) || dbSales.find(d => cleanName(d.k) === val);
+                        if (f && f.k) {
+                            let kName = cleanName(deriveKam(f.k));
+                            if (!filters.kam.includes(kName)) filters.kam.push(kName);
+                        }
+                    }
                 }
             }
+
+            if (filters.month.length > 0) {
+                let valid = new Set([...dbMaster, ...dbSales].filter(d => filters.month.includes(d.mo)).map(d => getW(d)));
+                filters.week = filters.week.filter(w => valid.has(w));
+            } else if (type === 'month') filters.week = [];
+
+            if (filters.hq.length > 0) {
+                let valid = new Set([...dbMaster, ...dbSales].filter(d => filters.hq.includes(d.hq)).map(d => d.ar));
+                filters.area = filters.area.filter(a => valid.has(a));
+            } else if (type === 'hq') filters.area = [];
+
+            if (filters.kam.length > 0) {
+                let valid = new Set([...dbMaster, ...dbSales].filter(d => filters.kam.includes(cleanName(deriveKam(d.k)))).map(d => cleanName(d.k)));
+                filters.kae = filters.kae.filter(k => valid.has(k));
+            } else if (type === 'kam') filters.kae = [];
+
+            renderFilters(); renderDashboard(); 
         }
-    }
 
-    if (filters.month.length > 0) {
-        let valid = new Set();
-        for(let i=0; i<dbMaster.length; i++) { if(filters.month.includes(dbMaster[i].mo)) valid.add(getW(dbMaster[i])); }
-        for(let i=0; i<dbSales.length; i++) { if(filters.month.includes(dbSales[i].mo)) valid.add(getW(dbSales[i])); }
-        filters.week = filters.week.filter(w => valid.has(w));
-    } else if (type === 'month') filters.week = [];
+        function populateDropdown(id, type, optionsArr, tAll) {
+            let drop = document.getElementById('drop-' + id); let lbl = document.getElementById('lbl-' + id);
+            if (filters[type].length === 0) lbl.innerText = tAll;
+            else if (filters[type].length === 1) lbl.innerText = filters[type][0];
+            else lbl.innerText = filters[type].length + ' đã chọn';
+            let htmlStr = `<div class="ms-opt ${filters[type].length === 0 ? 'selected' : ''}" onclick="updateF('${type}', 'all')">${tAll}</div>`;
+            optionsArr.forEach(opt => { let isSel = filters[type].includes(opt) ? 'selected' : ''; htmlStr += `<div class="ms-opt ${isSel}" onclick="updateF('${type}', '${opt}')">${opt}</div>`; });
+            drop.innerHTML = htmlStr;
+        }
 
-    if (filters.hq.length > 0) {
-        let valid = new Set();
-        for(let i=0; i<dbMaster.length; i++) { if(filters.hq.includes(dbMaster[i].hq)) valid.add(dbMaster[i].ar); }
-        for(let i=0; i<dbSales.length; i++) { if(filters.hq.includes(dbSales[i].hq)) valid.add(dbSales[i].ar); }
-        filters.area = filters.area.filter(a => valid.has(a));
-    } else if (type === 'hq') filters.area = [];
+        function renderFilters() {
+            if (dbMaster.length === 0 && dbSales.length === 0) return;
+            let allData = [...dbMaster, ...dbSales];
 
-    if (filters.kam.length > 0) {
-        let valid = new Set();
-        for(let i=0; i<dbMaster.length; i++) { if(filters.kam.includes(cleanName(deriveKam(dbMaster[i].k)))) valid.add(cleanName(dbMaster[i].k)); }
-        for(let i=0; i<dbSales.length; i++) { if(filters.kam.includes(cleanName(deriveKam(dbSales[i].k)))) valid.add(cleanName(dbSales[i].k)); }
-        filters.kae = filters.kae.filter(k => valid.has(k));
-    } else if (type === 'kam') filters.kae = [];
+            let availableMonths = [...new Set(allData.map(d => d.mo))].filter(Boolean);
+            availableMonths.sort((a,b) => (monthOrder[String(a).toLowerCase()]||99) - (monthOrder[String(b).toLowerCase()]||99));
+            populateDropdown('month', 'month', availableMonths, t('optAll'));
 
-    renderFilters(); render(); 
-}
+            let availableWeeks = [...new Set(allData.map(d => getW(d)))].filter(Boolean).sort();
+            populateDropdown('week', 'week', availableWeeks, t('optAll'));
 
-function populateDropdown(id, type, optionsArr, tAll) {
-    let drop = document.getElementById('drop-' + id); let lbl = document.getElementById('lbl-' + id);
-    if (filters[type].length === 0) lbl.innerText = tAll;
-    else if (filters[type].length === 1) lbl.innerText = filters[type][0];
-    else lbl.innerText = filters[type].length + ' đã chọn';
-    let htmlStr = `<div class="ms-opt ${filters[type].length === 0 ? 'selected' : ''}" onclick="updateF('${type}', 'all')">${tAll}</div>`;
-    optionsArr.forEach(opt => { let isSel = filters[type].includes(opt) ? 'selected' : ''; htmlStr += `<div class="ms-opt ${isSel}" onclick="updateF('${type}', '${opt}')">${opt}</div>`; });
-    drop.innerHTML = htmlStr;
-}
+            let availableHqs = [...new Set(allData.map(d=>d.hq))].filter(Boolean).sort();
+            populateDropdown('hq', 'hq', availableHqs, t('optAll'));
 
-function renderFilters() {
-    if (dbMaster.length === 0 && dbSales.length === 0) return;
-    let allData = [...dbMaster, ...dbSales];
+            let dArea = allData.filter(d => filters.hq.length === 0 || filters.hq.includes(d.hq));
+            let availableAreas = [...new Set(dArea.map(d=>d.ar))].filter(Boolean).sort();
+            populateDropdown('area', 'area', availableAreas, t('optAll'));
 
-    let availableMonths = [...new Set(allData.map(d => d.mo))].filter(Boolean);
-    availableMonths.sort((a,b) => (monthOrder[String(a).toLowerCase()]||99) - (monthOrder[String(b).toLowerCase()]||99));
-    populateDropdown('month', 'month', availableMonths, t('optAll'));
-
-    let availableWeeks = [...new Set(allData.map(d => getW(d)))].filter(Boolean).sort();
-    populateDropdown('week', 'week', availableWeeks, t('optAll'));
-
-    let availableHqs = [...new Set(allData.map(d=>d.hq))].filter(Boolean).sort();
-    populateDropdown('hq', 'hq', availableHqs, t('optAll'));
-
-    let dArea = allData.filter(d => filters.hq.length === 0 || filters.hq.includes(d.hq));
-    let availableAreas = [...new Set(dArea.map(d=>d.ar))].filter(Boolean).sort();
-    populateDropdown('area', 'area', availableAreas, t('optAll'));
-
-    const baseApplyF = d => (filters.month.length === 0 || filters.month.includes(d.mo)) && 
-                            (filters.week.length === 0 || filters.week.includes(getW(d).toUpperCase())) && 
-                            (filters.hq.length === 0 || filters.hq.includes(d.hq)) && 
-                            (filters.area.length === 0 || filters.area.includes(d.ar));
-    
-    const baseMaster = dbMaster.filter(baseApplyF);
-    const baseSales = dbSales.filter(baseApplyF);
-    
-    const globalKamStatus = buildStatusMap(allData, 'kam');
-    const localKamStatus = buildStatusMap(baseMaster, 'kam');
-    
-    const kList = document.getElementById("kamList");
-    let masterKamsSet = new Set(baseMaster.map(d => cleanName(deriveKam(d.k))));
-    let salesKams = [...new Set(baseSales.map(d => cleanName(deriveKam(d.k))))];
-    let allKams = [...new Set([...masterKamsSet, ...salesKams])].filter(Boolean);
-    
-    let kamStatusMap = {};
-    allKams.forEach(k => {
-        let globalSt = globalKamStatus[k] || k;
-        if (globalSt.startsWith('❌')) kamStatusMap[k] = globalSt;
-        else if (!masterKamsSet.has(k)) kamStatusMap[k] = "🚨 " + k + " (No Plan)";
-        else kamStatusMap[k] = localKamStatus[k] || k;
-    });
-    
-    allKams.sort((a, b) => {
-        let stA = kamStatusMap[a] || ""; let stB = kamStatusMap[b] || "";
-        if (stA.includes('🚨') && !stB.includes('🚨')) return -1; 
-        if (!stA.includes('🚨') && stB.includes('🚨')) return 1;
-        if (stA.includes('❌') && !stB.includes('❌')) return 1;  
-        if (!stA.includes('❌') && stB.includes('❌')) return -1;
-        return a.localeCompare(b);
-    });
-
-    let kamHtml = `<div class="list-item ${filters.kam.length === 0 ? 'selected' : ''}" onclick="updateF('kam', 'all')">${t('allKam')}</div>`;
-    allKams.forEach(k => { 
-        let isSel = filters.kam.includes(k) ? 'selected' : '';
-        kamHtml += `<div class="list-item ${isSel}" onclick="updateF('kam', '${k}')">${kamStatusMap[k]}</div>`; 
-    });
-    kList.innerHTML = kamHtml;
-    
-    const kaeList = document.getElementById("kaeList");
-    const kamApplyF = d => baseApplyF(d) && (filters.kam.length === 0 || filters.kam.includes(cleanName(deriveKam(d.k))));
-    
-    const mKaeData = dbMaster.filter(kamApplyF);
-    const sKaeData = dbSales.filter(kamApplyF);
-
-    const globalKaeStatus = buildStatusMap(allData, 'kae');
-    const localKaeStatus = buildStatusMap(mKaeData, 'kae');
-
-    let masterKaesSet = new Set(mKaeData.map(d => cleanName(d.k)));
-    let salesKaes = [...new Set(sKaeData.map(d => cleanName(d.k)))];
-    let allKaes = [...new Set([...masterKaesSet, ...salesKaes])].filter(Boolean);
-
-    let kaeStatusMap = {};
-    allKaes.forEach(n => {
-        let globalSt = globalKaeStatus[n] || n;
-        if (globalSt.startsWith('❌')) kaeStatusMap[n] = globalSt;
-        else if (!masterKaesSet.has(n)) kaeStatusMap[n] = "🚨 " + n + " (No Plan)";
-        else kaeStatusMap[n] = localKaeStatus[n] || n;
-    });
-
-    allKaes.sort((a, b) => {
-        let stA = kaeStatusMap[a] || ""; let stB = kaeStatusMap[b] || "";
-        if (stA.includes('🚨') && !stB.includes('🚨')) return -1;
-        if (!stA.includes('🚨') && stB.includes('🚨')) return 1;
-        if (stA.includes('❌') && !stB.includes('❌')) return 1; 
-        if (!stA.includes('❌') && stB.includes('❌')) return -1;
-        return a.localeCompare(b);
-    });
-
-    let kaeHtml = `<div class="list-item ${filters.kae.length === 0 ? 'selected' : ''}" onclick="updateF('kae', 'all')">${t('allKae')}</div>`;
-    allKaes.forEach(n => { 
-        let isSel = filters.kae.includes(n) ? 'selected' : '';
-        kaeHtml += `<div class="list-item ${isSel}" onclick="updateF('kae', '${n}')">${kaeStatusMap[n]}</div>`; 
-    });
-    kaeList.innerHTML = kaeHtml;
-}
-
-function getChartOptions() {
-    return { 
-        responsive:true, maintainAspectRatio:false, layout: { padding: { top: 30 } }, 
-        scales: { 
-            y: { beginAtZero: true, title: { display:true, text: t('axisCust'), font:{weight:'bold', size:12}, align:'end', padding: { bottom: 10 } }, ticks:{ font:{size:10} }, grid: { color: 'rgba(0,0,0,0.05)' } }, 
-            yS: { position:'right', grid:{drawOnChartArea:false}, beginAtZero: true, title: { display:true, text: t('axisVnd'), font:{weight:'bold', size:12}, align:'end', padding: { bottom: 10 } }, ticks:{ font:{size:10}, callback: (v) => fmt(v) } }, 
-            x: { grid: { display: false }, ticks: { font: { weight: 'bold' } } } 
-        }, 
-        plugins: { legend: { position: 'bottom', labels: { boxWidth: 15, font: { size: 11 } } } } 
-    };
-}
-
-function drawChart(chartId, dataArray, labelKey) {
-    if(charts[chartId]) charts[chartId].destroy();
-    charts[chartId] = new Chart(document.getElementById(chartId), {
-        data: {
-            labels: dataArray.map(x => x[labelKey]),
-            datasets: [
-                { type:'line', label: t('legSales'), data: dataArray.map(x => (x.s === "-" ? null : x.s)), borderColor:'#185FA5', backgroundColor:'#185FA5', yAxisID:'yS', order: 0, tension: 0.3, pointRadius: 5 },
-                { type:'bar', label: t('legTotal'), data: dataArray.map(x => (x.tc === "-" ? null : x.tc)), backgroundColor:'#B5D4F4', order: 1 },
-                { type:'bar', label: t('legActive'), data: dataArray.map(x => (x.ac === "-" ? null : x.ac)), backgroundColor:'#378ADD', order: 1 }
-            ]
-        }, options: getChartOptions()
-    });
-}
-
-function drawTable(headerId, bodyId, dataArray, titleColName, labelKey, isKaeTable = false, isWeekTable = false, showTotal = false, explicitTotal = null) {
-    let renderData = [...dataArray];
-    if (showTotal && explicitTotal) renderData.push(explicitTotal);
-
-    document.getElementById(headerId).innerHTML = `<th class="label-cell">${titleColName}</th>` + renderData.map(x => {
-        let isTotalCol = showTotal && x === renderData[renderData.length - 1];
-        return `<th style="${isTotalCol ? 'background: #042C53;' : ''}">${x[labelKey]}</th>`;
-    }).join("");
-    
-    let rows = [];
-    if (isKaeTable) { rows.push({ l: t('rowRoute'), k: "route", f: v => `<span style="color:var(--b6); font-weight:600">${v || "-"}</span>` }); }
-    
-    rows.push(
-        { l: t('rowTotal'), k: "tc", f: v => v === "-" ? "-" : fmt(v) },
-        { l: t('rowActive'), k: "ac", f: v => v === "-" ? "-" : `<b style="color:green">${fmt(v)}</b>` },
-        { l: t('rowSales'), k: "s", f: v => v === "-" ? "-" : fmt(v) },
-        { l: t('rowSku'), k: "avgSku", f: v => v === "-" ? "-" : `<span style="color:var(--b5); font-weight:700">${Number(v||0).toFixed(1)}</span>` },
-        { l: t('rowStrike'), k: "r", f: (_, i) => (i.tc > 0 && i.tc !== "-" && i.ac !== "-") ? `<b>${(i.ac/i.tc*100).toFixed(1)}%</b>` : '-' }
-    );
-
-    document.getElementById(bodyId).innerHTML = rows.map(r => `<tr><td class="label-cell">${r.l}</td>${renderData.map(item => { let isTotalCol = showTotal && item === renderData[renderData.length - 1]; return `<td style="${isTotalCol ? 'background: var(--b1); font-weight: bold;' : ''}">${r.f(item[r.k], item)}</td>`; }).join("")}</tr>`).join("");
-}
-
-function render() {
-    if (dbMaster.length === 0 && dbSales.length === 0) return; 
-
-    const baseApplyF = d => (filters.month.length === 0 || filters.month.includes(d.mo)) && 
-                            (filters.week.length === 0 || filters.week.includes(getW(d).toUpperCase())) && 
-                            (filters.hq.length === 0 || filters.hq.includes(d.hq)) && 
-                            (filters.area.length === 0 || filters.area.includes(d.ar));
-    const baseMaster = dbMaster.filter(baseApplyF);
-    const baseSales = dbSales.filter(baseApplyF);
-
-    const kamApplyF = d => baseApplyF(d) && (filters.kam.length === 0 || filters.kam.includes(cleanName(deriveKam(d.k))));
-    const kamMaster = dbMaster.filter(kamApplyF);
-    const kamSales = dbSales.filter(kamApplyF);
-
-    let inferredKams = [...filters.kam];
-    if (inferredKams.length === 0 && filters.kae.length > 0) { 
-        let tempKams = new Set();
-        filters.kae.forEach(k => {
-             const fKam = dbMaster.find(d => cleanName(d.k) === k) || dbSales.find(d => cleanName(d.k) === k);
-             if (fKam && fKam.k) tempKams.add(cleanName(deriveKam(fKam.k)));
-        });
-        inferredKams = [...tempKams];
-    }
-    
-    const kaeApplyF = d => baseApplyF(d) && 
-                           (inferredKams.length === 0 || inferredKams.includes(cleanName(deriveKam(d.k)))) &&
-                           (filters.kae.length === 0 || filters.kae.includes(cleanName(d.k)));
-    const kaeMaster = dbMaster.filter(kaeApplyF);
-    const kaeSales = dbSales.filter(kaeApplyF);
-
-    let ms = filters.month.length === 0 ? t('optAll') : filters.month.map(x => String(x).toUpperCase()).join(", ");
-    let ws = filters.week.length === 0 ? t('optAll') : filters.week.join(", ");
-    let hs = filters.hq.length === 0 ? t('optAll') : filters.hq.join(", ");
-    let as = filters.area.length === 0 ? t('optAll') : filters.area.join(", ");
-
-    const globalKamStatus = buildStatusMap([...dbMaster, ...dbSales], 'kam');
-    const globalKaeStatus = buildStatusMap([...dbMaster, ...dbSales], 'kae');
-
-    let kamsDisp = filters.kam.length === 0 ? t('optAll') : filters.kam.map(k => {
-        let st = globalKamStatus[k] || k;
-        if(!st.startsWith('❌') && !baseMaster.some(d => cleanName(deriveKam(d.k)) === k)) return "🚨 " + k;
-        return st;
-    }).join("; ");
-
-    let kaesDisp = filters.kae.length === 0 ? t('optAll') : filters.kae.map(k => {
-        let st = globalKaeStatus[k] || k;
-        if(!st.startsWith('❌') && !baseMaster.some(d => cleanName(d.k) === k)) return "🚨 " + k;
-        return st;
-    }).join("; ");
-
-    let baseSub = `${t('fMonth')}: ${ms} | ${t('fWeek')}: ${ws} | ${t('fRegion')}: ${hs} | ${t('fArea')}: ${as}`;
-    let kamSub = `${baseSub} | KAM: ${kamsDisp}`;
-    let kaeSub = `${kamSub} | KAE: ${kaesDisp}`;
-
-    if(document.getElementById('sub-area')) document.getElementById('sub-area').innerText = baseSub;
-    if(document.getElementById('sub-segment')) document.getElementById('sub-segment').innerText = baseSub;
-    if(document.getElementById('sub-kam')) document.getElementById('sub-kam').innerText = kamSub;
-    if(document.getElementById('sub-kae')) document.getElementById('sub-kae').innerText = kaeSub;
-    if(document.getElementById('sub-week')) document.getElementById('sub-week').innerText = kaeSub;
-
-    const sysKPI = aggregateDualData(baseMaster, baseSales);
-    document.getElementById("val-sales").innerText = fmt(sysKPI.s);
-    document.getElementById("val-cust").innerText = fmt(sysKPI.tc);
-    document.getElementById("val-strike").innerText = fmt(sysKPI.ac);
-    document.getElementById("val-strike-rate").innerText = (sysKPI.tc > 0 ? (sysKPI.ac/sysKPI.tc*100).toFixed(1) : 0) + "%";
-
-    const areas = [...new Set([...baseMaster.map(d=>d.ar), ...baseSales.map(d=>d.ar)])].filter(Boolean).sort(); 
-    const areaData = areas.map(a => ({ label: a, ...aggregateDualData(baseMaster.filter(d => d.ar === a), baseSales.filter(d => d.ar === a)) }));
-    drawChart('areaChart', areaData, 'label');
-    drawTable('areaHeaderRow', 'areaTableBody', areaData, t('tblColArea'), 'label', false, false, true, { label: lang === 'vi' ? "TỔNG" : "TOTAL", ...sysKPI, route: "-" });
-
-    renderSegmentTable(baseMaster, baseSales);
-
-    const getDayData = (mSubset, sSubset) => {
-        return [0, 1, 2, 3, 4, 5].map(idx => {
-            const mDay = mSubset.filter(d => parseDay(d.d) === idx);
-            const sDay = sSubset.filter(d => parseDay(d.d) === idx);
-            const agg = aggregateDualData(mDay, sDay);
-            let routes = new Set(); 
-            mDay.forEach(d => { 
-                let r = d.r ? String(d.r).trim() : ""; 
-                if (r && r !== "0" && r.toLowerCase() !== "no route") routes.add(r.toUpperCase());
+            const baseApplyF = d => (filters.month.length === 0 || filters.month.includes(d.mo)) && 
+                                    (filters.week.length === 0 || filters.week.includes(getW(d))) && 
+                                    (filters.hq.length === 0 || filters.hq.includes(d.hq)) && 
+                                    (filters.area.length === 0 || filters.area.includes(d.ar));
+            
+            const baseMaster = dbMaster.filter(baseApplyF);
+            const baseSales = dbSales.filter(baseApplyF);
+            
+            let masterKamsSet = new Set(baseMaster.map(d => cleanName(deriveKam(d.k))));
+            let salesKams = [...new Set(baseSales.map(d => cleanName(deriveKam(d.k))))];
+            let allKams = [...new Set([...masterKamsSet, ...salesKams])].filter(Boolean);
+            
+            let kamStatusMap = {};
+            allKams.forEach(k => {
+                let status = getKaeStatus(k);
+                let display = (status ? status + " " : "") + k;
+                if (status === '❌') kamStatusMap[k] = display;
+                else if (!masterKamsSet.has(k)) kamStatusMap[k] = "🚨 " + display + " (No Plan)";
+                else kamStatusMap[k] = display;
             });
-            return { d: t('days')[idx], ...agg, route: routes.size === 0 ? "-" : Array.from(routes).sort().join("/") };
-        });
-    };
+            
+            allKams.sort((a, b) => {
+                let stA = kamStatusMap[a] || ""; let stB = kamStatusMap[b] || "";
+                if (stA.includes('🚨') && !stB.includes('🚨')) return -1; 
+                if (!stA.includes('🚨') && stB.includes('🚨')) return 1;
+                if (stA.includes('❌') && !stB.includes('❌')) return 1;  
+                if (!stA.includes('❌') && stB.includes('❌')) return -1;
+                return a.localeCompare(b);
+            });
 
-    const kamDayData = getDayData(kamMaster, kamSales);
-    const kamAgg = aggregateDualData(kamMaster, kamSales);
-    drawChart('kamChart', kamDayData, 'd');
-    drawTable('kamHeaderRow', 'kamTableBody', kamDayData, t('tblColKam'), 'd', false, false, true, { 'd': lang === 'vi' ? "TỔNG" : "TOTAL", ...kamAgg, route: "-" }); 
+            let kamHtml = `<div class="list-item ${filters.kam.length === 0 ? 'selected' : ''}" onclick="updateF('kam', 'all')">${t('lblKam')}</div>`;
+            allKams.forEach(k => { 
+                let isSel = filters.kam.includes(k) ? 'selected' : '';
+                kamHtml += `<div class="list-item ${isSel}" onclick="updateF('kam', '${k}')">${kamStatusMap[k]}</div>`; 
+            });
+            document.getElementById("kamList").innerHTML = kamHtml;
+            
+            const kamApplyF = d => baseApplyF(d) && (filters.kam.length === 0 || filters.kam.includes(cleanName(deriveKam(d.k))));
+            const mKaeData = dbMaster.filter(kamApplyF);
+            const sKaeData = dbSales.filter(kamApplyF);
 
-    const kaeDayData = getDayData(kaeMaster, kaeSales);
-    const kaeAgg = aggregateDualData(kaeMaster, kaeSales);
-    drawChart('dayChart', kaeDayData, 'd');
-    drawTable('dayHeaderRow', 'dayTableBody', kaeDayData, t('tblColDay'), 'd', true, false, true, { 'd': lang === 'vi' ? "TỔNG" : "TOTAL", ...kaeAgg, route: "-" }); 
+            let masterKaesSet = new Set(mKaeData.map(d => cleanName(d.k)));
+            let salesKaes = [...new Set(sKaeData.map(d => cleanName(d.k)))];
+            let allKaes = [...new Set([...masterKaesSet, ...salesKaes])].filter(Boolean);
 
-    let wmSet = new Set();
-    kaeMaster.forEach(d => { if(getW(d)) wmSet.add(getW(d) + '|' + d.mo); });
-    kaeSales.forEach(d => { if(getW(d)) wmSet.add(getW(d) + '|' + d.mo); });
-    
-    let realWMs = Array.from(wmSet).map(str => {
-        let parts = str.split('|');
-        return { w: parts[0], m: parts[1] };
-    });
-    
-    realWMs.sort((a, b) => {
-        let m1 = monthOrder[String(a.m).toLowerCase()] || 99;
-        let m2 = monthOrder[String(b.m).toLowerCase()] || 99;
-        if (m1 !== m2) return m1 - m2;
-        return a.w.localeCompare(b.w);
-    });
+            let kaeStatusMap = {};
+            allKaes.forEach(n => {
+                let status = getKaeStatus(n);
+                let display = (status ? status + " " : "") + n;
+                if (status === '❌') kaeStatusMap[n] = display;
+                else if (!masterKaesSet.has(n)) kaeStatusMap[n] = "🚨 " + display + " (No Plan)";
+                else kaeStatusMap[n] = display;
+            });
 
-    const weekData = realWMs.map(item => ({ 
-        label: formatWM(item.w, item.m), 
-        ...aggregateDualData(
-            kaeMaster.filter(d => getW(d) === item.w && d.mo === item.m), 
-            kaeSales.filter(d => getW(d) === item.w && d.mo === item.m)
-        ) 
-    }));
+            allKaes.sort((a, b) => {
+                let stA = kaeStatusMap[a] || ""; let stB = kaeStatusMap[b] || "";
+                if (stA.includes('🚨') && !stB.includes('🚨')) return -1;
+                if (!stA.includes('🚨') && stB.includes('🚨')) return 1;
+                if (stA.includes('❌') && !stB.includes('❌')) return 1; 
+                if (!stA.includes('❌') && stB.includes('❌')) return -1;
+                return a.localeCompare(b);
+            });
 
-    drawChart('weekChart', weekData, 'label');
-    drawTable('weekHeaderRow', 'weekTableBody', weekData, t('tblColWeek'), 'label', false, true, true, { label: lang === 'vi' ? "TỔNG" : "TOTAL", ...aggregateDualData(kaeMaster, kaeSales), route: "-" });
+            let kaeHtml = `<div class="list-item ${filters.kae.length === 0 ? 'selected' : ''}" onclick="updateF('kae', 'all')">${t('lblKae')}</div>`;
+            allKaes.forEach(n => { 
+                let isSel = filters.kae.includes(n) ? 'selected' : '';
+                kaeHtml += `<div class="list-item ${isSel}" onclick="updateF('kae', '${n}')">${kaeStatusMap[n]}</div>`; 
+            });
+            document.getElementById("kaeList").innerHTML = kaeHtml;
+        }
 
-    const areaSalesTotal = areaData.reduce((sum, a) => sum + a.s, 0); 
-    const nationSalesTotal = dbSales.filter(d => (filters.month.length === 0 || filters.month.includes(d.mo)) && (filters.week.length === 0 || filters.week.includes(getW(d).toUpperCase()))).reduce((a,b)=>a+(Number(b.s)||0),0);
+        // =========================================================
+        // 3. LOGIC XỬ LÝ TABLE & ENGINE PHÂN TÍCH (MARKET TRACKING)
+        // =========================================================
+        function renderDashboard() {
+            if (dbMaster.length === 0 && dbSales.length === 0) return; 
 
-    document.getElementById("kam-val-sales").innerText = fmt(kamAgg.s); document.getElementById("kam-val-buying-rate").innerText = kamAgg.tc > 0 ? (kamAgg.ac / kamAgg.tc * 100).toFixed(1) + "%" : "0%";
-    document.getElementById("kam-val-contrib-area").innerText = areaSalesTotal > 0 ? (kamAgg.s / areaSalesTotal * 100).toFixed(1) + "%" : "0%"; document.getElementById("kam-val-contrib-nation").innerText = nationSalesTotal > 0 ? (kamAgg.s / nationSalesTotal * 100).toFixed(1) + "%" : "0%";
-    document.getElementById("kae-val-sales").innerText = fmt(kaeAgg.s); document.getElementById("kae-val-buying-rate").innerText = kaeAgg.tc > 0 ? (kaeAgg.ac / kaeAgg.tc * 100).toFixed(1) + "%" : "0%";
-    document.getElementById("kae-val-contrib-area").innerText = areaSalesTotal > 0 ? (kaeAgg.s / areaSalesTotal * 100).toFixed(1) + "%" : "0%"; document.getElementById("kae-val-contrib-nation").innerText = nationSalesTotal > 0 ? (kaeAgg.s / nationSalesTotal * 100).toFixed(1) + "%" : "0%";
-}
+            // Base filter
+            const baseApplyF = d => (filters.month.length === 0 || filters.month.includes(d.mo)) && 
+                                    (filters.week.length === 0 || filters.week.includes(getW(d))) && 
+                                    (filters.hq.length === 0 || filters.hq.includes(d.hq)) && 
+                                    (filters.area.length === 0 || filters.area.includes(d.ar));
+            
+            let inferredKams = [...filters.kam];
+            if (inferredKams.length === 0 && filters.kae.length > 0) { 
+                let tempKams = new Set();
+                filters.kae.forEach(k => {
+                     const fKam = dbMaster.find(d => cleanName(d.k) === k) || dbSales.find(d => cleanName(d.k) === k);
+                     if (fKam && fKam.k) tempKams.add(cleanName(deriveKam(fKam.k)));
+                });
+                inferredKams = [...tempKams];
+            }
+            
+            const fullApplyF = d => baseApplyF(d) && 
+                                   (inferredKams.length === 0 || inferredKams.includes(cleanName(deriveKam(d.k)))) &&
+                                   (filters.kae.length === 0 || filters.kae.includes(cleanName(d.k)));
+            
+            const fMaster = dbMaster.filter(fullApplyF);
+            const fSales = dbSales.filter(fullApplyF);
 
-function init() {
-    dbMaster = []; dbSales = [];
-    if (typeof dbMasterM5 !== 'undefined') dbMaster = dbMaster.concat(dbMasterM5);
-    if (typeof dbSalesM5 !== 'undefined')  dbSales  = dbSales.concat(dbSalesM5);
-    if (typeof dbMasterM6 !== 'undefined') dbMaster = dbMaster.concat(dbMasterM6);
-    if (typeof dbSalesM6 !== 'undefined')  dbSales  = dbSales.concat(dbSalesM6);
-    if (typeof dbMasterM7 !== 'undefined') dbMaster = dbMaster.concat(dbMasterM7);
-    if (typeof dbSalesM7 !== 'undefined')  dbSales  = dbSales.concat(dbSalesM7);
+            // Bóc tách Months & Weeks hiện có để vẽ Header động
+            targetMonths = [...new Set([...fMaster, ...fSales].map(d => d.mo))].filter(Boolean);
+            targetMonths.sort((a,b) => (monthOrder[String(a).toLowerCase()]||99) - (monthOrder[String(b).toLowerCase()]||99));
+            
+            // Xử lý weekly scope (Chỉ tính những tuần thuộc targetMonths)
+            let baseDataWeekly = [...fMaster, ...fSales].filter(d => targetMonths.includes(d.mo));
+            targetWeeks = [...new Set(baseDataWeekly.map(d => getW(d)))].filter(Boolean).sort();
 
-    initResizer(); setLang('vi'); 
-}
+            // ================== 3.1 DAILY TRACKING ==================
+            // Render Headers
+            document.getElementById('head-daily').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colMetric')}</th>${[0,1,2,3,4,5].map(i => `<th class="text-center">${t('days')[i]}</th>`).join('')}<th class="text-center" style="font-weight: bold; background-color: var(--table-header); color: #000; z-index:1;">${t('colTotalW')}</th>`;
+            
+            let dailyObj = {};
+            [0,1,2,3,4,5].forEach(idx => dailyObj[idx] = { mPlan: new Set(), mAct: new Set(), oPlan: new Set(), oAct: new Set(), sales: 0 });
+            
+            fMaster.forEach(r => { let dIdx = parseDay(r.d); if(dIdx >= 0) { if(r.m) dailyObj[dIdx].mPlan.add(r.m); if(r.cc) dailyObj[dIdx].oPlan.add(r.cc); } });
+            fSales.forEach(r => { let dIdx = parseDay(r.d); if(dIdx >= 0) { if(r.m) dailyObj[dIdx].mAct.add(r.m); if(r.cc) dailyObj[dIdx].oAct.add(r.cc); dailyObj[dIdx].sales += Number(r.s||0); } });
 
-window.onload = init;
-</script>
+            let totalChoD = new Set(), totalChoCoDonD = new Set(), totalCinRD = new Set(), totalKHLDD = new Set(), totalSalesD = 0;
+            [0,1,2,3,4,5].forEach(idx => {
+                dailyObj[idx].mPlan.forEach(x => totalChoD.add(x)); dailyObj[idx].mAct.forEach(x => totalChoCoDonD.add(x));
+                dailyObj[idx].oPlan.forEach(x => totalCinRD.add(x)); dailyObj[idx].oAct.forEach(x => totalKHLDD.add(x));
+                totalSalesD += dailyObj[idx].sales;
+            });
+
+            document.getElementById('tb-daily').innerHTML = `
+                <tr><td class="first-col-sticky">${t('rowPlanM')}</td>${[0,1,2,3,4,5].map(i => `<td class="text-center">${dailyObj[i].mPlan.size || '-'}</td>`).join('')}<td class="text-center" style="font-weight:bold; background-color:var(--background);">${totalChoD.size || '-'}</td></tr>
+                <tr><td class="first-col-sticky">${t('rowActM')}</td>${[0,1,2,3,4,5].map(i => `<td class="text-center">${dailyObj[i].mAct.size || '-'}</td>`).join('')}<td class="text-center" style="font-weight:bold; background-color:var(--background);">${totalChoCoDonD.size || '-'}</td></tr>
+                <tr style="border-bottom: 2px dashed var(--border);"><td class="first-col-sticky" style="color:var(--primary); font-weight:700;">${t('rowSRM')}</td>${[0,1,2,3,4,5].map(i => `<td class="text-center" style="color:var(--primary); font-weight:700;">${formatPct(dailyObj[i].mAct.size, dailyObj[i].mPlan.size)}</td>`).join('')}<td class="text-center" style="color:var(--primary); font-weight:bold; background-color:var(--background);">${formatPct(totalChoCoDonD.size, totalChoD.size)}</td></tr>
+                
+                <tr><td class="first-col-sticky">${t('rowPlanO')}</td>${[0,1,2,3,4,5].map(i => `<td class="text-center">${dailyObj[i].oPlan.size || '-'}</td>`).join('')}<td class="text-center" style="font-weight:bold; background-color:var(--background);">${totalCinRD.size || '-'}</td></tr>
+                <tr><td class="first-col-sticky">${t('rowActO')}</td>${[0,1,2,3,4,5].map(i => `<td class="text-center">${dailyObj[i].oAct.size || '-'}</td>`).join('')}<td class="text-center" style="font-weight:bold; background-color:var(--background);">${totalKHLDD.size || '-'}</td></tr>
+                <tr style="border-bottom: 2px solid var(--border);"><td class="first-col-sticky" style="color:var(--primary); font-weight:700;">${t('rowSRO')}</td>${[0,1,2,3,4,5].map(i => `<td class="text-center" style="color:var(--primary); font-weight:700;">${formatPct(dailyObj[i].oAct.size, dailyObj[i].oPlan.size)}</td>`).join('')}<td class="text-center" style="color:var(--primary); font-weight:bold; background-color:var(--background);">${formatPct(totalKHLDD.size, totalCinRD.size)}</td></tr>
+                
+                <tr style="font-weight:700; background-color:var(--primary-light);"><td class="first-col-sticky" style="background-color:var(--primary-light);">${t('rowSales')}</td>${[0,1,2,3,4,5].map(i => `<td class="text-center">${dailyObj[i].sales > 0 ? fmt(dailyObj[i].sales) : '-'}</td>`).join('')}<td class="text-center" style="font-weight:700; background-color:var(--background);">${totalSalesD > 0 ? fmt(totalSalesD) : '-'}</td></tr>
+            `;
+
+            // ================== 3.2 WEEKLY TRACKING ==================
+            document.getElementById('head-weekly').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colMetric')}</th>${targetWeeks.map(w => `<th class="text-center">${w}</th>`).join('')}<th class="text-center" style="font-weight: bold; background-color: var(--table-header); color: #000; z-index:1;">${t('colTotalM')}</th>`;
+            
+            let weekObj = {}; targetWeeks.forEach(w => weekObj[w] = { mPlan: new Set(), mAct: new Set(), oPlan: new Set(), oAct: new Set(), sales: 0 });
+            fMaster.forEach(r => { let w = getW(r); if(weekObj[w]) { if(r.m) weekObj[w].mPlan.add(r.m); if(r.cc) weekObj[w].oPlan.add(r.cc); } });
+            fSales.forEach(r => { let w = getW(r); if(weekObj[w]) { if(r.m) weekObj[w].mAct.add(r.m); if(r.cc) weekObj[w].oAct.add(r.cc); weekObj[w].sales += Number(r.s||0); } });
+
+            let totalChoW = new Set(), totalChoCoDonW = new Set(), totalCinRW = new Set(), totalKHLDW = new Set(), totalSalesW = 0;
+            targetWeeks.forEach(w => {
+                weekObj[w].mPlan.forEach(x => totalChoW.add(x)); weekObj[w].mAct.forEach(x => totalChoCoDonW.add(x));
+                weekObj[w].oPlan.forEach(x => totalCinRW.add(x)); weekObj[w].oAct.forEach(x => totalKHLDW.add(x));
+                totalSalesW += weekObj[w].sales;
+            });
+
+            document.getElementById('tb-weekly').innerHTML = targetWeeks.length === 0 ? `<tr><td colspan="10" class="empty-row">${t('noData')}</td></tr>` : `
+                <tr><td class="first-col-sticky">${t('rowPlanM')}</td>${targetWeeks.map(w => `<td class="text-center">${weekObj[w].mPlan.size || '-'}</td>`).join('')}<td class="text-center" style="font-weight:bold; background-color:var(--background);">${totalChoW.size || '-'}</td></tr>
+                <tr><td class="first-col-sticky">${t('rowActM')}</td>${targetWeeks.map(w => `<td class="text-center">${weekObj[w].mAct.size || '-'}</td>`).join('')}<td class="text-center" style="font-weight:bold; background-color:var(--background);">${totalChoCoDonW.size || '-'}</td></tr>
+                <tr style="border-bottom: 2px dashed var(--border);"><td class="first-col-sticky" style="color:var(--primary); font-weight:700;">${t('rowSRM')}</td>${targetWeeks.map(w => `<td class="text-center" style="color:var(--primary); font-weight:700;">${formatPct(weekObj[w].mAct.size, weekObj[w].mPlan.size)}</td>`).join('')}<td class="text-center" style="color:var(--primary); font-weight:bold; background-color:var(--background);">${formatPct(totalChoCoDonW.size, totalChoW.size)}</td></tr>
+                
+                <tr><td class="first-col-sticky">${t('rowPlanO')}</td>${targetWeeks.map(w => `<td class="text-center">${weekObj[w].oPlan.size || '-'}</td>`).join('')}<td class="text-center" style="font-weight:bold; background-color:var(--background);">${totalCinRW.size || '-'}</td></tr>
+                <tr><td class="first-col-sticky">${t('rowActO')}</td>${targetWeeks.map(w => `<td class="text-center">${weekObj[w].oAct.size || '-'}</td>`).join('')}<td class="text-center" style="font-weight:bold; background-color:var(--background);">${totalKHLDW.size || '-'}</td></tr>
+                <tr style="border-bottom: 2px solid var(--border);"><td class="first-col-sticky" style="color:var(--primary); font-weight:700;">${t('rowSRO')}</td>${targetWeeks.map(w => `<td class="text-center" style="color:var(--primary); font-weight:700;">${formatPct(weekObj[w].oAct.size, weekObj[w].oPlan.size)}</td>`).join('')}<td class="text-center" style="color:var(--primary); font-weight:bold; background-color:var(--background);">${formatPct(totalKHLDW.size, totalCinRW.size)}</td></tr>
+                
+                <tr style="font-weight:700; background-color:var(--primary-light);"><td class="first-col-sticky" style="background-color:var(--primary-light);">${t('rowSales')}</td>${targetWeeks.map(w => `<td class="text-center">${weekObj[w].sales > 0 ? fmt(weekObj[w].sales) : '-'}</td>`).join('')}<td class="text-center" style="font-weight:700; background-color:var(--background); color:#000;">${totalSalesW > 0 ? fmt(totalSalesW) : '-'}</td></tr>
+            `;
+
+            // ================== 3.3 MONTHLY TRACKING ==================
+            document.getElementById('head-monthly').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colMetric')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}`;
+            
+            let monthObj = {}; targetMonths.forEach(m => monthObj[m] = { mPlan: new Set(), oAct: new Set(), sales: 0 });
+            fMaster.forEach(r => { if(monthObj[r.mo] && r.m) monthObj[r.mo].mPlan.add(r.m); });
+            fSales.forEach(r => { if(monthObj[r.mo]) { if(r.cc) monthObj[r.mo].oAct.add(r.cc); monthObj[r.mo].sales += Number(r.s||0); } });
+
+            document.getElementById('tb-monthly').innerHTML = targetMonths.length === 0 ? `<tr><td colspan="10" class="empty-row">${t('noData')}</td></tr>` : `
+                <tr><td class="first-col-sticky">${t('rowPlanM')}</td>${targetMonths.map(m => `<td class="text-right">${monthObj[m].mPlan.size || '-'}</td>`).join('')}</tr>
+                <tr><td class="first-col-sticky">${t('rowActO')}</td>${targetMonths.map(m => `<td class="text-right">${monthObj[m].oAct.size || '-'}</td>`).join('')}</tr>
+                <tr><td class="first-col-sticky">${t('rowSales')}</td>${targetMonths.map(m => `<td class="text-right" style="color:var(--primary); font-weight:700;">${monthObj[m].sales > 0 ? fmt(monthObj[m].sales) : '-'}</td>`).join('')}</tr>
+            `;
+
+            // ================== 3.4 OVERVIEW ĐỊA BÀN ==================
+            let distMap = {};
+            // Gather universe
+            Object.keys(districtUniverse).forEach(k => { distMap[k] = { minD: districtUniverse[k].minD, cinD: districtUniverse[k].cinD, mAct: new Set(), oAct: new Set(), sales: 0 }; });
+            
+            fSales.forEach(r => {
+                let info = getMarketInfo(r.ar, r.m); let dist = info ? info.di : 'Chưa Rõ';
+                if (!distMap[dist]) distMap[dist] = { minD: 0, cinD: 0, mAct: new Set(), oAct: new Set(), sales: 0 };
+                if (r.m) distMap[dist].mAct.add(r.m);
+                if (r.cc) distMap[dist].oAct.add(r.cc);
+                distMap[dist].sales += Number(r.s || 0);
+            });
+
+            // Filter out empty districts
+            let distArray = Object.keys(distMap).map(k => ({ dist: k, ...distMap[k] })).filter(d => d.mAct.size > 0 || d.sales > 0);
+            distArray.sort((a,b) => b.sales - a.sales);
+
+            document.getElementById('tb-overview').innerHTML = distArray.length === 0 ? `<tr><td colspan="8" class="empty-row">${t('noData')}</td></tr>` : distArray.map(d => `
+                <tr>
+                    <td class="first-col-sticky" style="font-weight:600;">${d.dist}</td>
+                    <td class="text-right">${d.minD || '-'}</td>
+                    <td class="text-right" style="font-weight:600; color:#000;">${d.mAct.size}</td>
+                    <td class="text-right" style="font-weight:700; color:var(--primary);">${formatPct(d.mAct.size, d.minD)}</td>
+                    <td class="text-right">${d.cinD || '-'}</td>
+                    <td class="text-right" style="font-weight:600; color:#000;">${d.oAct.size}</td>
+                    <td class="text-right" style="font-weight:700; color:var(--primary);">${formatPct(d.oAct.size, d.cinD)}</td>
+                    <td class="text-right" style="font-weight:700;">${fmt(d.sales)}</td>
+                </tr>`).join('');
+
+            // ================== 3.5 TOP 20 CHỢ ==================
+            document.getElementById('head-top-markets').innerHTML = `<th class="first-col-sticky">${t('colMarket')}</th><th>${t('colDistrict')}</th><th>${t('colKae')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header); z-index:1;">${t('colTotal')}</th>`;
+            
+            let mTop = {};
+            fSales.forEach(r => {
+                const mk = r.m; if(!mk) return;
+                if(!mTop[mk]) { 
+                    let info = getMarketInfo(r.ar, r.m); let dist = info ? info.di : 'Chưa Rõ';
+                    mTop[mk] = { name: mk, district: dist, kae: new Set(), months: {}, total: 0 }; 
+                    targetMonths.forEach(m => mTop[mk].months[m] = 0); 
+                }
+                mTop[mk].kae.add(cleanName(r.k));
+                if (mTop[mk].months[r.mo] !== undefined) mTop[mk].months[r.mo] += Number(r.s || 0);
+                mTop[mk].total += Number(r.s || 0);
+            });
+            const topMArr = Object.values(mTop).sort((a,b) => b.total - a.total).slice(0, 20);
+            
+            document.getElementById('tb-top-markets').innerHTML = topMArr.length === 0 ? `<tr><td colspan="15" class="empty-row">${t('noData')}</td></tr>` : topMArr.map(mk => `
+                <tr><td class="first-col-sticky" style="font-weight:600;">${mk.name}</td><td>${mk.district}</td><td>${Array.from(mk.kae).join(', ')}</td>
+                ${targetMonths.map(m => `<td class="text-right">${mk.months[m] > 0 ? fmt(mk.months[m]) : '-'}</td>`).join('')}
+                <td class="text-right" style="font-weight:700; background-color:var(--background);">${fmt(mk.total)}</td></tr>`).join('');
+
+            // ================== 3.6 TOP 20 KHÁCH HÀNG ==================
+            document.getElementById('head-top-customers').innerHTML = `<th class="first-col-sticky">${t('colCuscode')}</th><th>${t('colCusname')}</th><th>${t('colBelongM')}</th><th>${t('colKae')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header); z-index:1;">${t('colTotal')}</th>`;
+            
+            let cTop = {};
+            fSales.forEach(r => {
+                const code = r.cc; if(!code) return;
+                if(!cTop[code]) { 
+                    cTop[code] = { code: code, name: r.cn || 'N/A', market: r.m, kae: new Set(), months: {}, total: 0 }; 
+                    targetMonths.forEach(m => cTop[code].months[m] = 0); 
+                }
+                cTop[code].kae.add(cleanName(r.k));
+                if (cTop[code].months[r.mo] !== undefined) cTop[code].months[r.mo] += Number(r.s || 0);
+                cTop[code].total += Number(r.s || 0);
+            });
+            const topCArr = Object.values(cTop).sort((a,b) => b.total - a.total).slice(0, 20);
+            
+            document.getElementById('tb-top-customers').innerHTML = topCArr.length === 0 ? `<tr><td colspan="15" class="empty-row">${t('noData')}</td></tr>` : topCArr.map(c => `
+                <tr><td class="first-col-sticky"><span class="badge">${c.code}</span></td><td style="font-weight:600;">${c.name}</td><td>${c.market}</td><td>${Array.from(c.kae).join(', ')}</td>
+                ${targetMonths.map(m => `<td class="text-right">${c.months[m] > 0 ? fmt(c.months[m]) : '-'}</td>`).join('')}
+                <td class="text-right" style="font-weight:700; background-color:var(--background);">${fmt(c.total)}</td></tr>`).join('');
+
+            // ================== 3.7 SKU ==================
+            document.getElementById('head-sku').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colSku')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header); z-index:1;">${t('colTotal')}</th>`;
+            
+            let sTop = {};
+            fSales.forEach(r => {
+                const sku = r.sku; if(!sku) return;
+                if(!sTop[sku]) { 
+                    sTop[sku] = { name: sku, months: {}, total: 0 }; 
+                    targetMonths.forEach(m => sTop[sku].months[m] = 0); 
+                }
+                if (sTop[sku].months[r.mo] !== undefined) sTop[sku].months[r.mo] += Number(r.s || 0);
+                sTop[sku].total += Number(r.s || 0);
+            });
+            const topSArr = Object.values(sTop).sort((a,b) => b.total - a.total);
+            
+            document.getElementById('tb-sku').innerHTML = topSArr.length === 0 ? `<tr><td colspan="15" class="empty-row">${t('noData')}</td></tr>` : topSArr.map(s => `
+                <tr><td class="first-col-sticky text-left">${s.name}</td>
+                ${targetMonths.map(m => `<td class="text-right">${s.months[m] > 0 ? fmt(s.months[m]) : '-'}</td>`).join('')}
+                <td class="text-right" style="font-weight:700; color:var(--primary); background-color:var(--background);">${fmt(s.total)}</td></tr>`).join('');
+        }
+
+        // =========================================================
+        // 4. KHỞI TẠO HỆ THỐNG
+        // =========================================================
+        function init() {
+            dbMaster = []; dbSales = [];
+            if (typeof dbMasterM5 !== 'undefined') dbMaster = dbMaster.concat(dbMasterM5);
+            if (typeof dbSalesM5 !== 'undefined')  dbSales  = dbSales.concat(dbSalesM5);
+            if (typeof dbMasterM6 !== 'undefined') dbMaster = dbMaster.concat(dbMasterM6);
+            if (typeof dbSalesM6 !== 'undefined')  dbSales  = dbSales.concat(dbSalesM6);
+
+            // Pre-calculate District Universe from dbMarket
+            if (typeof dbMarket !== 'undefined') {
+                Object.keys(dbMarket).forEach(key => {
+                    let mInfo = dbMarket[key];
+                    let dist = mInfo.di || 'Chưa Rõ';
+                    if (!districtUniverse[dist]) districtUniverse[dist] = { minD: 0, cinD: 0 };
+                    districtUniverse[dist].minD++;
+                    districtUniverse[dist].cinD += Number(mInfo.ec || 0);
+                });
+            }
+
+            setLang('vi'); 
+        }
+
+        window.onload = init;
+    </script>
 </body>
 </html>
