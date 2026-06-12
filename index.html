@@ -13,7 +13,6 @@
             --sidebar-width: 440px;
         }
         
-        /* 🔥 Xóa hiệu ứng chớp xám khi chạm ngón tay trên Android 🔥 */
         * { -webkit-tap-highlight-color: transparent; }
 
         body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; background-color: #f0f4f8; color: var(--b7); font-size: 13px; overflow-x: hidden; }
@@ -61,7 +60,7 @@
         .personnel-filters { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex-grow: 1; overflow: hidden; margin-top: 5px; }
         .list-container { display: flex; flex-direction: column; height: 100%; border: 1px solid var(--b2); border-radius: 6px; overflow: hidden; }
         .list-label { font-size: 11px; font-weight: 700; color: white; background: var(--b5); padding: 12px; text-align: center; }
-        .scroll-list { overflow-y: auto; flex-grow: 1; background: #fff; overscroll-behavior-y: contain; } /* Ngăn chặn vuốt danh sách làm giật cả trang web trên Android */
+        .scroll-list { overflow-y: auto; flex-grow: 1; background: #fff; overscroll-behavior-y: contain; } 
         .list-item { padding: 12px 14px; border-bottom: 1px solid #f1f5f9; cursor: pointer; font-size: 11px; transition: 0.2s; user-select: none;}
         .list-item:hover { background: var(--b1); }
         .list-item.selected { background: var(--b4); color: white; font-weight: 600; }
@@ -85,7 +84,6 @@
         .chart-title::before { content: ""; display: inline-block; width: 4px; height: 18px; background: var(--b4); margin-right: 10px; }
         .chart-subtitle { font-size: 12px; font-weight: 600; color: #16a34a; margin-bottom: 25px; padding-left: 14px; text-transform: uppercase; font-style: italic; }
         
-        /* 🔥 CHỐNG TRƯỢT NHẦM KHI VUỐT BẢNG NGANG TRÊN ANDROID 🔥 */
         .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--b2); margin-top: 15px; width: 100%; display: block; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; padding-bottom: 5px; }
         .data-table { width: 100%; border-collapse: collapse; background: white; font-size: 12px; min-width: 800px; } 
         .data-table th { background: var(--b5); color: white; padding: 12px; border: 1px solid rgba(255,255,255,0.1); white-space: nowrap; }
@@ -99,9 +97,6 @@
         .seg-area-cell { background-color: #f8fafc; font-weight: bold; text-align: left !important; color: var(--b6); border-right: 2px solid var(--b3) !important; position: sticky; left: 0; z-index: 2;}
         .seg-name-cell { text-align: left !important; font-weight: 600; color: #475569; position: sticky; left: 0; background: white; z-index: 1; }
 
-        /* =========================================================
-           🔥 GIAO DIỆN TƯƠNG THÍCH ĐIỆN THOẠI (MOBILE RESPONSIVE) 🔥
-           ========================================================= */
         @media screen and (max-width: 768px) {
             .menu-btn { display: flex; } 
             
@@ -171,7 +166,7 @@
 
         <div class="personnel-filters">
             <div class="list-container">
-                <div class="list-label">KAM</div>
+                <div class="list-label">KAM (Auto Mapped)</div>
                 <div class="scroll-list" id="kamList"></div>
             </div>
             <div class="list-container">
@@ -203,9 +198,9 @@
         </div>
 
         <div class="chart-box">
-            <div class="chart-title" data-i18n="cSegmentTitle">PHÂN TÍCH HIỆU SUẤT THEO PHÂN KHÚC KHÁCH HÀNG (CUSTOMER SEGMENT BY AREA)</div>
+            <div class="chart-title" data-i18n="cSegmentTitle">PHÂN TÍCH HIỆU SUẤT THEO PHÂN KHÚC TUYẾN (ROUTE CLASS BY AREA)</div>
             <div class="chart-subtitle" id="sub-segment"></div>
-            <div class="kpi-grid" id="segmentKpiContainer" style="grid-template-columns: repeat(5, 1fr); margin-bottom: 20px;"></div>
+            <div class="kpi-grid" id="segmentKpiContainer" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 20px;"></div>
             <div class="table-wrap" id="segmentAreaTableContainer"></div>
         </div>
 
@@ -245,10 +240,9 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="kamMap.js"></script>
+
+<script src="dbMarket.js"></script>
 <script src="dataM5.js"></script>
-<script src="dataM6.js"></script>
-<script src="dataM7.js"></script>
 
 <script>
 const dict = {
@@ -257,7 +251,7 @@ const dict = {
         allKam: "TẤT CẢ KAM", allKae: "TẤT CẢ KAE/DSR", kpiSales: "TỔNG SELL OUT", kpiSalesSub: "VNĐ (Chưa VAT)", 
         kpiTotal: "TỔNG KH TRÊN TUYẾN", kpiTotalSub: "khách hàng", kpiActive: "Khách Active", kpiActiveSub: "khách hàng", 
         kpiStrike: "Strike Rate", kpiStrikeSub: "Tỷ lệ KH Active / Tổng", cAreaTitle: "HIỆU SUẤT THEO KHU VỰC (AREA)", 
-        cSegmentTitle: "📊 PHÂN TÍCH HIỆU SUẤT THEO PHÂN KHÚC KHÁCH HÀNG (CUSTOMER SEGMENT BY AREA)",
+        cSegmentTitle: "📊 PHÂN TÍCH HIỆU SUẤT THEO PHÂN KHÚC TUYẾN (ROUTE CLASS BY AREA)",
         cKamTitle: "HIỆU SUẤT DOANH SỐ VÀ KHÁCH HÀNG BY KAM", cDayTitle: "HIỆU SUẤT DOANH SỐ VÀ KHÁCH HÀNG BY KAE",
         axisCust: "Đơn vị: Mã KH", axisVnd: "Đơn vị: VNĐ", legSales: "Doanh số", legTotal: "Tổng KH Kế Hoạch", legActive: "KH Active",
         tblColArea: "Chỉ số / Khu vực", tblColKam: "Chỉ số / Ngày (KAM)", tblColDay: "Chỉ số / Ngày (KAE)",
@@ -267,14 +261,14 @@ const dict = {
         kamContribArea: "ĐÓNG GÓP SELL OUT CHO AREA", kamContribAreaSub: "% Doanh số Area", kamContribNation: "ĐÓNG GÓP SELL OUT CHO TOÀN QUỐC", kamContribNationSub: "% Doanh số Toàn quốc",
         kaeSales: "TỔNG SELL OUT KAE", kaeBR: "TỶ LỆ LÊN ĐƠN CỦA KHÁCH HÀNG DO KAE CHĂM SÓC", kaeContribArea: "ĐÓNG GÓP SELL OUT CỦA KAE CHO AREA", kaeContribNation: "ĐÓNG GÓP SELL OUT CỦA KAE CHO TOÀN QUỐC",
         cWeekTitle: "HIỆU SUẤT DOANH SỐ VÀ KHÁCH HÀNG THEO TUẦN", cWeekSubtitle: "TỔNG HỢP DỮ LIỆU CÁC TUẦN", tblColWeek: "Chỉ số / Tuần",
-        segColClass: "Mã Class / Phân khúc", segColPlan: "KH Tuyến (Plan)", segColAct: "KH Lên Đơn (Active)", segColSR: "Strike Rate", segColSales: "Doanh số (VND)", segColAvg: "TB Doanh Số / KH Active"
+        segColClass: "Loại Tuyến (Route)", segColPlan: "KH Tuyến (Plan)", segColAct: "KH Lên Đơn (Active)", segColSR: "Strike Rate", segColSales: "Doanh số (VND)", segColAvg: "TB Doanh Số / KH Active"
     },
     en: {
         sysTitle: "ROUTE PRODUCTIVITIES REPORT", fMonth: "Month", fWeek: "Week", fRegion: "Region", fArea: "Area", optAll: "All", 
         allKam: "ALL KAMs", allKae: "ALL KAE/DSRs", kpiSales: "Total SELL OUT", kpiSalesSub: "VND (Excl. VAT)", 
         kpiTotal: "ROUTE TOTAL CUS.", kpiTotalSub: "Customers", kpiActive: "Active Customers", kpiActiveSub: "Customers", 
         kpiStrike: "Strike Rate", kpiStrikeSub: "Active / Total Ratio", cAreaTitle: "PERFORMANCE BY AREA", 
-        cSegmentTitle: "📊 CUSTOMER SEGMENT PRODUCTIVITY BY AREA",
+        cSegmentTitle: "📊 ROUTE CLASS PRODUCTIVITY BY AREA",
         cKamTitle: "SALES & CUSTOMER PERFORMANCE BY KAM", cDayTitle: "SALES & CUSTOMER PERFORMANCE BY KAE",
         axisCust: "Unit: Cust. Codes", axisVnd: "Unit: VND", legSales: "Sales", legTotal: "Planned Cust.", legActive: "Active Cust.",
         tblColArea: "Metric / Area", tblColKam: "Metric / Day (KAM)", tblColDay: "Metric / Day (KAE)",
@@ -284,13 +278,14 @@ const dict = {
         kamContribArea: "SELL OUT CONTRIBUTES TO AREA", kamContribAreaSub: "% Sales / Area", kamContribNation: "SELL OUT CONTRIBUTES TO NATIONWIDE", kamContribNationSub: "% Sales / Nationwide",
         kaeSales: "TOTAL SELL OUT BY KAE", kaeBR: "CUSTOMER BUYING RATE", kaeContribArea: "KAE SELL OUT CONTRIBUTES TO AREA", kaeContribNation: "KAE SELL OUT CONTRIBUTES TO NATIONWIDE",
         cWeekTitle: "WEEKLY SELL OUT SUMMARY", cWeekSubtitle: "WEEKLY DATA SUMMARY", tblColWeek: "Metric / Week",
-        segColClass: "Segment Class", segColPlan: "Planned Cust.", segColAct: "Active Cust.", segColSR: "Strike Rate", segColSales: "Sales (VND)", segColAvg: "Avg Sales / Active Cust."
+        segColClass: "Route Class", segColPlan: "Planned Cust.", segColAct: "Active Cust.", segColSR: "Strike Rate", segColSales: "Sales (VND)", segColAvg: "Avg Sales / Active Cust."
     }
 };
 
-const segNames = { 'A': 'Class A (10MVND above)', 'B': 'Class B (5 MVND -> 9.9 MVND)', 'C': 'Class C (3 MVND -> 4.9 MVND)', 'D': 'Class D (below 3 MVND)', 'N': 'Is Classifying (0 MVND to less than 1 MVND)' };
-const segColors = { 'A': '#16a34a', 'B': '#2563eb', 'C': '#ea580c', 'D': '#dc2626', 'N': '#64748b' };
-const monthOrder = { "jan":1, "feb":2, "mar":3, "apr":4, "may":5, "jun":6, "jul":7, "aug":8, "sep":9, "oct":10, "nov":11, "dec":12 };
+// Map loại tuyến thành tên gọi thân thiện cho UI (bạn có thể bổ sung nếu có thêm mã tuyến mới)
+const segNames = { 'F4': 'Tuyến F4 (1 Lần/Tuần)', 'F2-1': 'Tuyến F2-1 (2 Lần/Tuần)', 'F2-2': 'Tuyến F2-2 (2 Lần/Tuần)', 'N': 'Chưa Rõ Tuyến' };
+const segColors = { 'F4': '#16a34a', 'F2-1': '#2563eb', 'F2-2': '#ea580c', 'N': '#64748b' };
+const monthOrder = { "jan":1, "feb":2, "mar":3, "apr":4, "may":5, "jun":6, "jul":7, "aug":8, "sep":9, "oct":10, "nov":11, "dec":12, "tháng 1":1, "tháng 2":2, "tháng 3":3, "tháng 4":4, "tháng 5":5 };
 
 let lang = 'vi';
 let filters = { month: [], week: [], hq: [], area: [], kam: [], kae: [] };
@@ -299,30 +294,42 @@ let dbMaster = []; let dbSales = [];
 
 const t = (key) => dict[lang][key] || key;
 const fmt = (n) => new Intl.NumberFormat('en-US').format(Math.round(n || 0));
-const getW = (d) => String(d.week || d.Week || "").toUpperCase().trim();
+const getW = (d) => String(d.w || d.Week || "").toUpperCase().trim();
 
 const formatWM = (w, m) => {
     if (!m) return w;
-    let mNum = monthOrder[m.toLowerCase()] || m;
+    let mNum = monthOrder[String(m).toLowerCase()] || m;
     let mName = m.charAt(0).toUpperCase() + m.slice(1).toLowerCase();
     return lang === 'vi' ? `${w} T${mNum}` : `${w} ${mName}`;
 };
 
+// Logic tìm thông tin Chợ từ Khóa Gộp
+const getMarketInfo = (ar, m) => {
+    if (typeof dbMarket === 'undefined') return null;
+    let compKey = ar + "_" + m;
+    return dbMarket[compKey] || null;
+}
+
+// Logic bóc tách tên nhân sự KAE -> KAM (Hoặc hiển thị nếu không có map)
 const cleanName = (name, isKamField = false) => {
     let cleanStr = String(name || "").replace(/[✔️❌]/g, '').trim();
-    if (isKamField) {
-        cleanStr = cleanStr.toUpperCase(); 
-        if (typeof kamMap !== 'undefined' && kamMap[cleanStr]) return kamMap[cleanStr]; 
-    }
+    if (isKamField && typeof kamMap !== 'undefined' && kamMap[cleanStr]) return kamMap[cleanStr]; 
     return cleanStr;
 };
+
+// Giả lập lấy tên KAM từ tên KAE nếu bạn không lưu trực tiếp KAM trong db
+const deriveKam = (kaeName) => {
+    let cleanKae = cleanName(kaeName);
+    return cleanKae; // Hiện tại ta coi KAE là KAM. Hãy thêm map KAE -> KAM của bạn vào đây nếu có.
+}
 
 const buildStatusMap = (subset, key) => {
     let map = {}; let isKamField = (key === 'kam');
     for (let i = subset.length - 1; i >= 0; i--) {
-        let clean = cleanName(subset[i][key], isKamField);
+        let val = isKamField ? deriveKam(subset[i].k) : subset[i].k;
+        let clean = cleanName(val, isKamField);
         if (!map[clean]) {
-            let raw = String(subset[i][key]).trim();
+            let raw = String(val).trim();
             let match = raw.match(/^[✔️❌]/);
             map[clean] = match ? match[0] + ' ' + clean : clean;
         }
@@ -341,21 +348,22 @@ const parseDay = (dayStr) => {
     return -1; 
 };
 
+// Hàm tính toán cốt lõi với cấu trúc Key ngắn gọn (cc, s, qt...)
 const aggregateDualData = (masterSubset, salesSubset) => {
     let masterSet = new Set();
-    masterSubset.forEach(d => { if (d.cusCode) masterSet.add(d.cusCode); });
+    masterSubset.forEach(d => { if (d.cc) masterSet.add(d.cc); });
     let totalC = masterSet.size;
 
     let sales = 0, skuLines = 0, invoiceCount = 0;
     let salesSet = new Set();
     
     salesSubset.forEach(d => {
-        let currentSales = Number(d.sales) || 0;
+        let currentSales = Number(d.s) || 0;
         sales += currentSales; 
         if (currentSales > 0) {
-            skuLines += (Number(d.skuLines) || 0);
-            invoiceCount++;
-            if (d.cusCode) salesSet.add(d.cusCode);
+            skuLines += 1; // Mỗi dòng (row) coi như 1 line hàng bán ra
+            invoiceCount++; 
+            if (d.cc) salesSet.add(d.cc);
         }
     });
 
@@ -364,25 +372,26 @@ const aggregateDualData = (masterSubset, salesSubset) => {
     return { s: sales, tc: totalC, ac: activeC, avgSku: avgSku };
 };
 
+// Render bảng phân tích phân khúc tuyến (F4, F2-1, F2-2)
 function renderSegmentTable(masterSubset, salesSubset) {
     let cusSegmentMap = {}; let uniqueMasterCus = new Set();
     masterSubset.forEach(d => {
-        if (d.cusCode) {
-            cusSegmentMap[d.cusCode] = d.CusS ? String(d.CusS).toUpperCase().trim() : "N";
-            uniqueMasterCus.add(d.cusCode);
+        if (d.cc) {
+            cusSegmentMap[d.cc] = d.r ? String(d.r).toUpperCase().trim() : "N";
+            uniqueMasterCus.add(d.cc);
         }
     });
 
-    let globalSegCount = { 'A': 0, 'B': 0, 'C': 0, 'D': 0, 'N': 0 };
+    let globalSegCount = { 'F4': 0, 'F2-1': 0, 'F2-2': 0, 'N': 0 };
     uniqueMasterCus.forEach(code => {
         let seg = cusSegmentMap[code] || 'N';
         if(globalSegCount[seg] !== undefined) globalSegCount[seg]++; else globalSegCount['N']++; 
     });
 
-    let totalCus = uniqueMasterCus.size; let kpiHtml = ''; let segList = ['A', 'B', 'C', 'D', 'N'];
+    let totalCus = uniqueMasterCus.size; let kpiHtml = ''; let segList = ['F4', 'F2-1', 'F2-2', 'N'];
     segList.forEach(seg => {
         let count = globalSegCount[seg]; let pct = totalCus > 0 ? ((count / totalCus) * 100).toFixed(1) + '%' : '0%';
-        let color = segColors[seg]; let displayTitle = (seg === 'N') ? "IS CLASSIFYING" : `CLASS ${seg}`;
+        let color = segColors[seg] || '#333'; let displayTitle = segNames[seg] || seg;
         kpiHtml += `
             <div class="kpi-card" style="padding: 12px; border-bottom: 4px solid ${color};">
                 <div class="label" style="color: ${color}; font-weight: 800;">${displayTitle}</div>
@@ -395,19 +404,19 @@ function renderSegmentTable(masterSubset, salesSubset) {
 
     let matrix = {};
     masterSubset.forEach(d => {
-        let area = d.area || "Unknown Area"; let code = d.cusCode; let seg = cusSegmentMap[code] || "N";
+        let area = d.ar || "Unknown Area"; let code = d.cc; let seg = cusSegmentMap[code] || "N";
         if (!matrix[area]) matrix[area] = {};
         if (!matrix[area][seg]) matrix[area][seg] = { planSet: new Set(), activeSet: new Set(), salesSum: 0 };
         if (code) matrix[area][seg].planSet.add(code);
     });
 
     salesSubset.forEach(d => {
-        let area = d.area || "Unknown Area"; let code = d.cusCode;
+        let area = d.ar || "Unknown Area"; let code = d.cc;
         if (!code) return;
         let seg = cusSegmentMap[code] || "N";
         if (!matrix[area]) matrix[area] = {};
         if (!matrix[area][seg]) matrix[area][seg] = { planSet: new Set(), activeSet: new Set(), salesSum: 0 };
-        let currentSales = Number(d.sales) || 0;
+        let currentSales = Number(d.s) || 0;
         matrix[area][seg].salesSum += currentSales;
         if (currentSales > 0) matrix[area][seg].activeSet.add(code);
     });
@@ -427,8 +436,8 @@ function renderSegmentTable(masterSubset, salesSubset) {
             let sr = planCount > 0 ? ((actCount / planCount) * 100).toFixed(1) + '%' : '0.0%';
             let sales = data.salesSum; let avg = actCount > 0 ? Math.round(sales / actCount) : 0;
             html += `<tr>`;
-            if (isFirst) { html += `<td rowspan="6" class="seg-area-cell">${area}</td>`; isFirst = false; }
-            html += `<td class="seg-name-cell">${segNames[seg]}</td><td>${fmt(planCount)}</td><td style="color:green; font-weight:bold;">${fmt(actCount)}</td><td style="font-weight:bold;">${sr}</td><td style="text-align:right;">${fmt(sales)}</td><td style="text-align:right; color:var(--b5); font-weight:600;">${fmt(avg)}</td></tr>`;
+            if (isFirst) { html += `<td rowspan="5" class="seg-area-cell">${area}</td>`; isFirst = false; }
+            html += `<td class="seg-name-cell">${segNames[seg] || seg}</td><td>${fmt(planCount)}</td><td style="color:green; font-weight:bold;">${fmt(actCount)}</td><td style="font-weight:bold;">${sr}</td><td style="text-align:right;">${fmt(sales)}</td><td style="text-align:right; color:var(--b5); font-weight:600;">${fmt(avg)}</td></tr>`;
         });
 
         let areaSr = areaPlanCount > 0 ? ((areaActCount / areaPlanCount) * 100).toFixed(1) + '%' : '0.0%';
@@ -485,16 +494,16 @@ function updateF(type, val) {
             filters[type].push(val); 
             if (type === 'week') {
                 let f = dbMaster.find(d => getW(d) === val) || dbSales.find(d => getW(d) === val);
-                if (f && f.month && !filters.month.includes(f.month)) filters.month.push(f.month);
+                if (f && f.mo && !filters.month.includes(f.mo)) filters.month.push(f.mo);
             }
             if (type === 'area') {
-                let f = dbMaster.find(d => d.area === val) || dbSales.find(d => d.area === val);
+                let f = dbMaster.find(d => d.ar === val) || dbSales.find(d => d.ar === val);
                 if (f && f.hq && !filters.hq.includes(f.hq)) filters.hq.push(f.hq);
             }
             if (type === 'kae') {
-                let f = dbMaster.find(d => cleanName(d.kae) === val) || dbSales.find(d => cleanName(d.kae) === val);
-                if (f && f.kam) {
-                    let kName = cleanName(f.kam, true);
+                let f = dbMaster.find(d => cleanName(d.k) === val) || dbSales.find(d => cleanName(d.k) === val);
+                if (f && f.k) {
+                    let kName = cleanName(deriveKam(f.k), true);
                     if (!filters.kam.includes(kName)) filters.kam.push(kName);
                 }
             }
@@ -503,22 +512,22 @@ function updateF(type, val) {
 
     if (filters.month.length > 0) {
         let valid = new Set();
-        for(let i=0; i<dbMaster.length; i++) { if(filters.month.includes(dbMaster[i].month)) valid.add(getW(dbMaster[i])); }
-        for(let i=0; i<dbSales.length; i++) { if(filters.month.includes(dbSales[i].month)) valid.add(getW(dbSales[i])); }
+        for(let i=0; i<dbMaster.length; i++) { if(filters.month.includes(dbMaster[i].mo)) valid.add(getW(dbMaster[i])); }
+        for(let i=0; i<dbSales.length; i++) { if(filters.month.includes(dbSales[i].mo)) valid.add(getW(dbSales[i])); }
         filters.week = filters.week.filter(w => valid.has(w));
     } else if (type === 'month') filters.week = [];
 
     if (filters.hq.length > 0) {
         let valid = new Set();
-        for(let i=0; i<dbMaster.length; i++) { if(filters.hq.includes(dbMaster[i].hq)) valid.add(dbMaster[i].area); }
-        for(let i=0; i<dbSales.length; i++) { if(filters.hq.includes(dbSales[i].hq)) valid.add(dbSales[i].area); }
+        for(let i=0; i<dbMaster.length; i++) { if(filters.hq.includes(dbMaster[i].hq)) valid.add(dbMaster[i].ar); }
+        for(let i=0; i<dbSales.length; i++) { if(filters.hq.includes(dbSales[i].hq)) valid.add(dbSales[i].ar); }
         filters.area = filters.area.filter(a => valid.has(a));
     } else if (type === 'hq') filters.area = [];
 
     if (filters.kam.length > 0) {
         let valid = new Set();
-        for(let i=0; i<dbMaster.length; i++) { if(filters.kam.includes(cleanName(dbMaster[i].kam, true))) valid.add(cleanName(dbMaster[i].kae)); }
-        for(let i=0; i<dbSales.length; i++) { if(filters.kam.includes(cleanName(dbSales[i].kam, true))) valid.add(cleanName(dbSales[i].kae)); }
+        for(let i=0; i<dbMaster.length; i++) { if(filters.kam.includes(cleanName(deriveKam(dbMaster[i].k), true))) valid.add(cleanName(dbMaster[i].k)); }
+        for(let i=0; i<dbSales.length; i++) { if(filters.kam.includes(cleanName(deriveKam(dbSales[i].k), true))) valid.add(cleanName(dbSales[i].k)); }
         filters.kae = filters.kae.filter(k => valid.has(k));
     } else if (type === 'kam') filters.kae = [];
 
@@ -539,8 +548,8 @@ function renderFilters() {
     if (dbMaster.length === 0 && dbSales.length === 0) return;
     let allData = [...dbMaster, ...dbSales];
 
-    let availableMonths = [...new Set(allData.map(d => d.month))].filter(Boolean);
-    availableMonths.sort((a,b) => (monthOrder[a.toLowerCase()]||99) - (monthOrder[b.toLowerCase()]||99));
+    let availableMonths = [...new Set(allData.map(d => d.mo))].filter(Boolean);
+    availableMonths.sort((a,b) => (monthOrder[String(a).toLowerCase()]||99) - (monthOrder[String(b).toLowerCase()]||99));
     populateDropdown('month', 'month', availableMonths, t('optAll'));
 
     let availableWeeks = [...new Set(allData.map(d => getW(d)))].filter(Boolean).sort();
@@ -550,13 +559,13 @@ function renderFilters() {
     populateDropdown('hq', 'hq', availableHqs, t('optAll'));
 
     let dArea = allData.filter(d => filters.hq.length === 0 || filters.hq.includes(d.hq));
-    let availableAreas = [...new Set(dArea.map(d=>d.area))].filter(Boolean).sort();
+    let availableAreas = [...new Set(dArea.map(d=>d.ar))].filter(Boolean).sort();
     populateDropdown('area', 'area', availableAreas, t('optAll'));
 
-    const baseApplyF = d => (filters.month.length === 0 || filters.month.includes(d.month)) && 
+    const baseApplyF = d => (filters.month.length === 0 || filters.month.includes(d.mo)) && 
                             (filters.week.length === 0 || filters.week.includes(getW(d).toUpperCase())) && 
                             (filters.hq.length === 0 || filters.hq.includes(d.hq)) && 
-                            (filters.area.length === 0 || filters.area.includes(d.area));
+                            (filters.area.length === 0 || filters.area.includes(d.ar));
     
     const baseMaster = dbMaster.filter(baseApplyF);
     const baseSales = dbSales.filter(baseApplyF);
@@ -565,8 +574,8 @@ function renderFilters() {
     const localKamStatus = buildStatusMap(baseMaster, 'kam');
     
     const kList = document.getElementById("kamList");
-    let masterKamsSet = new Set(baseMaster.map(d => cleanName(d.kam, true)));
-    let salesKams = [...new Set(baseSales.map(d => cleanName(d.kam, true)))];
+    let masterKamsSet = new Set(baseMaster.map(d => cleanName(deriveKam(d.k), true)));
+    let salesKams = [...new Set(baseSales.map(d => cleanName(deriveKam(d.k), true)))];
     let allKams = [...new Set([...masterKamsSet, ...salesKams])].filter(Boolean);
     
     let kamStatusMap = {};
@@ -594,7 +603,7 @@ function renderFilters() {
     kList.innerHTML = kamHtml;
     
     const kaeList = document.getElementById("kaeList");
-    const kamApplyF = d => baseApplyF(d) && (filters.kam.length === 0 || filters.kam.includes(cleanName(d.kam, true)));
+    const kamApplyF = d => baseApplyF(d) && (filters.kam.length === 0 || filters.kam.includes(cleanName(deriveKam(d.k), true)));
     
     const mKaeData = dbMaster.filter(kamApplyF);
     const sKaeData = dbSales.filter(kamApplyF);
@@ -602,8 +611,8 @@ function renderFilters() {
     const globalKaeStatus = buildStatusMap(allData, 'kae');
     const localKaeStatus = buildStatusMap(mKaeData, 'kae');
 
-    let masterKaesSet = new Set(mKaeData.map(d => cleanName(d.kae)));
-    let salesKaes = [...new Set(sKaeData.map(d => cleanName(d.kae)))];
+    let masterKaesSet = new Set(mKaeData.map(d => cleanName(d.k)));
+    let salesKaes = [...new Set(sKaeData.map(d => cleanName(d.k)))];
     let allKaes = [...new Set([...masterKaesSet, ...salesKaes])].filter(Boolean);
 
     let kaeStatusMap = {};
@@ -683,14 +692,14 @@ function drawTable(headerId, bodyId, dataArray, titleColName, labelKey, isKaeTab
 function render() {
     if (dbMaster.length === 0 && dbSales.length === 0) return; 
 
-    const baseApplyF = d => (filters.month.length === 0 || filters.month.includes(d.month)) && 
+    const baseApplyF = d => (filters.month.length === 0 || filters.month.includes(d.mo)) && 
                             (filters.week.length === 0 || filters.week.includes(getW(d).toUpperCase())) && 
                             (filters.hq.length === 0 || filters.hq.includes(d.hq)) && 
-                            (filters.area.length === 0 || filters.area.includes(d.area));
+                            (filters.area.length === 0 || filters.area.includes(d.ar));
     const baseMaster = dbMaster.filter(baseApplyF);
     const baseSales = dbSales.filter(baseApplyF);
 
-    const kamApplyF = d => baseApplyF(d) && (filters.kam.length === 0 || filters.kam.includes(cleanName(d.kam, true)));
+    const kamApplyF = d => baseApplyF(d) && (filters.kam.length === 0 || filters.kam.includes(cleanName(deriveKam(d.k), true)));
     const kamMaster = dbMaster.filter(kamApplyF);
     const kamSales = dbSales.filter(kamApplyF);
 
@@ -698,15 +707,15 @@ function render() {
     if (inferredKams.length === 0 && filters.kae.length > 0) { 
         let tempKams = new Set();
         filters.kae.forEach(k => {
-             const fKam = dbMaster.find(d => cleanName(d.kae) === k) || dbSales.find(d => cleanName(d.kae) === k);
-             if (fKam && fKam.kam) tempKams.add(cleanName(fKam.kam, true));
+             const fKam = dbMaster.find(d => cleanName(d.k) === k) || dbSales.find(d => cleanName(d.k) === k);
+             if (fKam && fKam.k) tempKams.add(cleanName(deriveKam(fKam.k), true));
         });
         inferredKams = [...tempKams];
     }
     
     const kaeApplyF = d => baseApplyF(d) && 
-                           (inferredKams.length === 0 || inferredKams.includes(cleanName(d.kam, true))) &&
-                           (filters.kae.length === 0 || filters.kae.includes(cleanName(d.kae)));
+                           (inferredKams.length === 0 || inferredKams.includes(cleanName(deriveKam(d.k), true))) &&
+                           (filters.kae.length === 0 || filters.kae.includes(cleanName(d.k)));
     const kaeMaster = dbMaster.filter(kaeApplyF);
     const kaeSales = dbSales.filter(kaeApplyF);
 
@@ -720,13 +729,13 @@ function render() {
 
     let kamsDisp = filters.kam.length === 0 ? t('optAll') : filters.kam.map(k => {
         let st = globalKamStatus[k] || k;
-        if(!st.startsWith('❌') && !baseMaster.some(d => cleanName(d.kam, true) === k)) return "🚨 " + k;
+        if(!st.startsWith('❌') && !baseMaster.some(d => cleanName(deriveKam(d.k), true) === k)) return "🚨 " + k;
         return st;
     }).join("; ");
 
     let kaesDisp = filters.kae.length === 0 ? t('optAll') : filters.kae.map(k => {
         let st = globalKaeStatus[k] || k;
-        if(!st.startsWith('❌') && !baseMaster.some(d => cleanName(d.kae) === k)) return "🚨 " + k;
+        if(!st.startsWith('❌') && !baseMaster.some(d => cleanName(d.k) === k)) return "🚨 " + k;
         return st;
     }).join("; ");
 
@@ -746,8 +755,8 @@ function render() {
     document.getElementById("val-strike").innerText = fmt(sysKPI.ac);
     document.getElementById("val-strike-rate").innerText = (sysKPI.tc > 0 ? (sysKPI.ac/sysKPI.tc*100).toFixed(1) : 0) + "%";
 
-    const areas = [...new Set([...baseMaster.map(d=>d.area), ...baseSales.map(d=>d.area)])].filter(Boolean).sort(); 
-    const areaData = areas.map(a => ({ label: a, ...aggregateDualData(baseMaster.filter(d => d.area === a), baseSales.filter(d => d.area === a)) }));
+    const areas = [...new Set([...baseMaster.map(d=>d.ar), ...baseSales.map(d=>d.ar)])].filter(Boolean).sort(); 
+    const areaData = areas.map(a => ({ label: a, ...aggregateDualData(baseMaster.filter(d => d.ar === a), baseSales.filter(d => d.ar === a)) }));
     drawChart('areaChart', areaData, 'label');
     drawTable('areaHeaderRow', 'areaTableBody', areaData, t('tblColArea'), 'label', false, false, true, { label: lang === 'vi' ? "TỔNG" : "TOTAL", ...sysKPI, route: "-" });
 
@@ -755,12 +764,12 @@ function render() {
 
     const getDayData = (mSubset, sSubset) => {
         return [0, 1, 2, 3, 4, 5].map(idx => {
-            const mDay = mSubset.filter(d => parseDay(d.day) === idx);
-            const sDay = sSubset.filter(d => parseDay(d.day) === idx);
+            const mDay = mSubset.filter(d => parseDay(d.d) === idx);
+            const sDay = sSubset.filter(d => parseDay(d.d) === idx);
             const agg = aggregateDualData(mDay, sDay);
             let routes = new Set(); 
             mDay.forEach(d => { 
-                let r = d.rt ? String(d.rt).trim() : ""; 
+                let r = d.r ? String(d.r).trim() : ""; 
                 if (r && r !== "0" && r.toLowerCase() !== "no route") routes.add(r.toUpperCase());
             });
             return { d: t('days')[idx], ...agg, route: routes.size === 0 ? "-" : Array.from(routes).sort().join("/") };
@@ -778,8 +787,8 @@ function render() {
     drawTable('dayHeaderRow', 'dayTableBody', kaeDayData, t('tblColDay'), 'd', true, false, true, { 'd': lang === 'vi' ? "TỔNG" : "TOTAL", ...kaeAgg, route: "-" }); 
 
     let wmSet = new Set();
-    kaeMaster.forEach(d => { if(getW(d)) wmSet.add(getW(d) + '|' + d.month); });
-    kaeSales.forEach(d => { if(getW(d)) wmSet.add(getW(d) + '|' + d.month); });
+    kaeMaster.forEach(d => { if(getW(d)) wmSet.add(getW(d) + '|' + d.mo); });
+    kaeSales.forEach(d => { if(getW(d)) wmSet.add(getW(d) + '|' + d.mo); });
     
     let realWMs = Array.from(wmSet).map(str => {
         let parts = str.split('|');
@@ -787,8 +796,8 @@ function render() {
     });
     
     realWMs.sort((a, b) => {
-        let m1 = monthOrder[a.m.toLowerCase()] || 99;
-        let m2 = monthOrder[b.m.toLowerCase()] || 99;
+        let m1 = monthOrder[String(a.m).toLowerCase()] || 99;
+        let m2 = monthOrder[String(b.m).toLowerCase()] || 99;
         if (m1 !== m2) return m1 - m2;
         return a.w.localeCompare(b.w);
     });
@@ -796,8 +805,8 @@ function render() {
     const weekData = realWMs.map(item => ({ 
         label: formatWM(item.w, item.m), 
         ...aggregateDualData(
-            kaeMaster.filter(d => getW(d) === item.w && d.month === item.m), 
-            kaeSales.filter(d => getW(d) === item.w && d.month === item.m)
+            kaeMaster.filter(d => getW(d) === item.w && d.mo === item.m), 
+            kaeSales.filter(d => getW(d) === item.w && d.mo === item.m)
         ) 
     }));
 
@@ -805,7 +814,7 @@ function render() {
     drawTable('weekHeaderRow', 'weekTableBody', weekData, t('tblColWeek'), 'label', false, true, true, { label: lang === 'vi' ? "TỔNG" : "TOTAL", ...aggregateDualData(kaeMaster, kaeSales), route: "-" });
 
     const areaSalesTotal = areaData.reduce((sum, a) => sum + a.s, 0); 
-    const nationSalesTotal = dbSales.filter(d => (filters.month.length === 0 || filters.month.includes(d.month)) && (filters.week.length === 0 || filters.week.includes(getW(d).toUpperCase()))).reduce((a,b)=>a+(Number(b.sales)||0),0);
+    const nationSalesTotal = dbSales.filter(d => (filters.month.length === 0 || filters.month.includes(d.mo)) && (filters.week.length === 0 || filters.week.includes(getW(d).toUpperCase()))).reduce((a,b)=>a+(Number(b.s)||0),0);
 
     document.getElementById("kam-val-sales").innerText = fmt(kamAgg.s); document.getElementById("kam-val-buying-rate").innerText = kamAgg.tc > 0 ? (kamAgg.ac / kamAgg.tc * 100).toFixed(1) + "%" : "0%";
     document.getElementById("kam-val-contrib-area").innerText = areaSalesTotal > 0 ? (kamAgg.s / areaSalesTotal * 100).toFixed(1) + "%" : "0%"; document.getElementById("kam-val-contrib-nation").innerText = nationSalesTotal > 0 ? (kamAgg.s / nationSalesTotal * 100).toFixed(1) + "%" : "0%";
@@ -815,12 +824,10 @@ function render() {
 
 function init() {
     dbMaster = []; dbSales = [];
+    // Load data from file JS 
     if (typeof dbMasterM5 !== 'undefined') dbMaster = dbMaster.concat(dbMasterM5);
     if (typeof dbSalesM5 !== 'undefined')  dbSales  = dbSales.concat(dbSalesM5);
-    if (typeof dbMasterM6 !== 'undefined') dbMaster = dbMaster.concat(dbMasterM6);
-    if (typeof dbSalesM6 !== 'undefined')  dbSales  = dbSales.concat(dbSalesM6);
-    if (typeof dbMasterM7 !== 'undefined') dbMaster = dbMaster.concat(dbMasterM7);
-    if (typeof dbSalesM7 !== 'undefined')  dbSales  = dbSales.concat(dbSalesM7);
+    // Bạn có thể duplicate thêm logic load M6, M7 tương tự bên dưới
 
     initResizer(); setLang('vi'); 
 }
