@@ -517,6 +517,18 @@
         // =========================================================
         // 2. LOGIC BỘ LỌC ĐA DỮ LIỆU & UI UX
         // =========================================================
+        function setLang(newLang) {
+            lang = newLang; 
+            document.getElementById('btn-vi').className = lang === 'vi' ? 'active' : ''; 
+            document.getElementById('btn-en').className = lang === 'en' ? 'active' : '';
+            document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n')); });
+            
+            // Xử lý lại text riêng cho Dropdown "Tất cả" vì nội dung này gen trong JS
+            renderFilters(); 
+            renderDashboard();
+        }
+
+        let openMS = null;
         function toggleMS(id) {
             if(openMS && openMS !== id) document.getElementById('drop-'+openMS).style.display = 'none';
             let drop = document.getElementById('drop-'+id);
@@ -594,7 +606,7 @@
                                     (filters.hq.length === 0 || filters.hq.includes(d.hq)) && 
                                     (filters.area.length === 0 || filters.area.includes(d.ar));
             
-            // Ở danh sách KAE/DSR, lọc Master phải dựa trên checkActiveWeek để loại bỏ KAE có plan ảo
+            // Ở danh sách Nhân viên, lọc Master phải dựa trên checkActiveWeek để loại bỏ plan ảo
             const baseMaster = dbMaster.filter(d => baseApplyF(d) && checkActiveWeek(d.r, getW(d)));
             const baseSales = dbSales.filter(baseApplyF);
             
@@ -665,7 +677,7 @@
             targetWeeks = [...new Set(baseDataWeekly.map(d => getW(d)))].filter(Boolean).sort();
 
             // ================== DAILY TRACKING ==================
-            document.getElementById('head-daily').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colMetric')}</th>${[0,1,2,3,4,5].map(i => `<th class="text-center">${t('days')[i]}</th>`).join('')}<th class="text-center" style="font-weight: bold; background-color: var(--table-header); color: #000;">${t('colTotalW')}</th>`;
+            document.getElementById('head-daily').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colMetric')}</th>${[0,1,2,3,4,5].map(i => `<th class="text-center">${t('days')[i]}</th>`).join('')}<th class="text-center" style="font-weight: bold; background-color: var(--table-header); color: #000; z-index:1;">${t('colTotalW')}</th>`;
             
             let dailyObj = {};
             [0,1,2,3,4,5].forEach(idx => dailyObj[idx] = { mPlan: new Set(), mAct: new Set(), oPlan: new Set(), oAct: new Set(), sales: 0 });
@@ -719,7 +731,8 @@
             `;
 
             // ================== MONTHLY TRACKING ==================
-            document.getElementById('head-monthly').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colMetric')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header); color: #000;">${t('colTotal')}</th>`;
+            // 🔥 Cập nhật cấu trúc giống Weekly/Daily
+            document.getElementById('head-monthly').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colMetric')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header); color: #000; z-index:1;">${t('colTotal')}</th>`;
             
             let monthObj = {}; targetMonths.forEach(m => monthObj[m] = { mPlan: new Set(), mAct: new Set(), oPlan: new Set(), oAct: new Set(), sales: 0 });
             
@@ -781,7 +794,8 @@
                 </tr>`).join('');
 
             // ================== TOP 20 CHỢ ==================
-            document.getElementById('head-top-markets').innerHTML = `<th class="first-col-sticky">${t('colMarket')}</th><th>${t('colDistrict')}</th><th>${t('colKae')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header);">${t('colTotal')}</th>`;
+            // Sửa colKae thành "Nhân Viên" và bỏ Freeze
+            document.getElementById('head-top-markets').innerHTML = `<th class="first-col-sticky">${t('colMarket')}</th><th>${t('colDistrict')}</th><th>${t('colKae')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header); z-index:1;">${t('colTotal')}</th>`;
             
             let mTop = {};
             fSales.forEach(r => {
@@ -793,6 +807,7 @@
                     mTop[mk] = { name: mk, district: dist, kaesAtLatest: new Set([cleanName(r.k)]), latestTime: tVal, months: {}, total: 0 }; 
                     targetMonths.forEach(m => mTop[mk].months[m] = 0); 
                 } else {
+                    // Logic Snapshot: Luôn ưu tiên tên KAE của thời gian mới nhất (Tháng lớn nhất -> Tuần lớn nhất)
                     if(tVal > mTop[mk].latestTime) {
                         mTop[mk].latestTime = tVal;
                         mTop[mk].kaesAtLatest = new Set([cleanName(r.k)]);
@@ -812,7 +827,8 @@
                 <td class="text-right" style="font-weight:700; background-color:var(--background);">${fmt(mk.total)}</td></tr>`).join('');
 
             // ================== TOP 20 KHÁCH HÀNG ==================
-            document.getElementById('head-top-customers').innerHTML = `<th class="first-col-sticky">${t('colCuscode')}</th><th>${t('colCusname')}</th><th>${t('colBelongM')}</th><th>${t('colKae')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header);">${t('colTotal')}</th>`;
+            // Tương tự, dùng Logic Snapshot cho khách hàng
+            document.getElementById('head-top-customers').innerHTML = `<th class="first-col-sticky">${t('colCuscode')}</th><th>${t('colCusname')}</th><th>${t('colBelongM')}</th><th>${t('colKae')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header); z-index:1;">${t('colTotal')}</th>`;
             
             let cTop = {};
             fSales.forEach(r => {
@@ -842,17 +858,20 @@
                 <td class="text-right" style="font-weight:700; background-color:var(--background);">${fmt(c.total)}</td></tr>`).join('');
 
             // ================== SKU (BẢNG LỚN + BIỂU ĐỒ) ==================
-            document.getElementById('head-sku').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colSku')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header);">${t('colTotal')}</th>`;
+            document.getElementById('head-sku').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colSku')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header); z-index:1;">${t('colTotal')}</th>`;
             
             let sTop = {};      
             let catGroup = {};  
             let grandTotalSales = 0;
+            let grandTotalQty = 0;
 
+            // 1. Phân loại và Cộng dồn Số lượng (qt) & Doanh số (s)
             fSales.forEach(r => {
                 const sku = r.sku; if(!sku) return;
                 let saleVal = Number(r.s || 0);
-                let qtyVal = Number(r.qt || 0); 
+                let qtyVal = Number(r.qt || 0); // Lấy số lượng thùng/gói
                 
+                // Gom vào SKU nhỏ
                 if(!sTop[sku]) { 
                     sTop[sku] = { name: sku, months: {}, total: 0, qty: 0 }; 
                     targetMonths.forEach(m => sTop[sku].months[m] = 0); 
@@ -861,6 +880,7 @@
                 sTop[sku].total += saleVal;
                 sTop[sku].qty += qtyVal;
 
+                // Gom vào Category Nhóm Lớn
                 let catObj = getSkuCategory(sku);
                 if(!catGroup[catObj.id]) {
                     catGroup[catObj.id] = { id: catObj.id, name: catObj.name, color: catObj.color, total: 0, qty: 0, items: [] };
@@ -869,16 +889,17 @@
                 catGroup[catObj.id].qty += qtyVal;
                 
                 grandTotalSales += saleVal;
+                grandTotalQty += qtyVal;
             });
 
-            // Vẽ Bảng Lớn
+            // 2. Vẽ Bảng Lớn (80%)
             const topSArr = Object.values(sTop).sort((a,b) => b.total - a.total);
             document.getElementById('tb-sku').innerHTML = topSArr.length === 0 ? `<tr><td colspan="15" class="empty-row">${t('noData')}</td></tr>` : topSArr.map(s => `
                 <tr><td class="first-col-sticky text-left">${s.name}</td>
                 ${targetMonths.map(m => `<td class="text-right">${s.months[m] > 0 ? fmt(s.months[m]) : '-'}</td>`).join('')}
                 <td class="text-right" style="font-weight:700; color:var(--primary); background-color:var(--background);">${fmt(s.total)}</td></tr>`).join('');
 
-            // Chuẩn bị dữ liệu cho Chart và Bảng phụ
+            // 3. Chuẩn bị dữ liệu cho Chart và Bảng phụ
             let validCats = Object.values(catGroup).filter(c => c.total > 0).sort((a,b) => b.total - a.total);
             
             if(charts['skuDoughnut']) charts['skuDoughnut'].destroy();
@@ -890,9 +911,13 @@
             } else {
                 document.getElementById('chartCenterText').style.display = 'block';
                 
+                // 🔥 THUẬT TOÁN VISUAL PADDING & BẬC THANG (OFFSET) 🔥
+                // Đảm bảo lát cắt nhỏ nhất cũng hiển thị ít nhất 2.5% để dễ click
                 const minVisual = grandTotalSales * 0.025; 
                 const visualData = validCats.map(c => Math.max(c.total, minVisual));
-                const offsets = validCats.map((c, i) => i * 4); 
+                
+                // Cấp bậc Offset xô lệch cho từng lát cắt để tạo "chiều cao" (bán kính ngoài) khác nhau
+                const offsets = validCats.map((c, i) => i * 4); // Ví dụ: [0, 4, 8, 12, 16]
 
                 const ctx = document.getElementById('skuDoughnut').getContext('2d');
                 charts['skuDoughnut'] = new Chart(ctx, {
@@ -924,7 +949,7 @@
                                 const idx = elements[0].index;
                                 const cat = validCats[idx];
                                 pctEl.innerText = ((cat.total / grandTotalSales) * 100).toFixed(1) + '%';
-                                pctEl.style.color = chart.data.datasets[0].backgroundColor[idx];
+                                pctEl.style.color = cat.color;
                                 lblEl.innerText = cat.name;
                             } else {
                                 pctEl.innerText = '100%';
@@ -976,7 +1001,27 @@
             }
         }
 
+        // =========================================================
+        // 4. KHỞI TẠO HỆ THỐNG
+        // =========================================================
         function init() {
+            dbMaster = []; dbSales = [];
+            if (typeof dbMasterM5 !== 'undefined') dbMaster = dbMaster.concat(dbMasterM5);
+            if (typeof dbSalesM5 !== 'undefined')  dbSales  = dbSales.concat(dbSalesM5);
+            if (typeof dbMasterM6 !== 'undefined') dbMaster = dbMaster.concat(dbMasterM6);
+            if (typeof dbSalesM6 !== 'undefined')  dbSales  = dbSales.concat(dbSalesM6);
+
+            // Xử lý dữ liệu Chợ và Quận Huyện
+            if (typeof dbMarket !== 'undefined') {
+                Object.keys(dbMarket).forEach(key => {
+                    let mInfo = dbMarket[key];
+                    let dist = mInfo.di || 'Chưa Rõ';
+                    if (!districtUniverse[dist]) districtUniverse[dist] = { minD: 0, cinD: 0 };
+                    districtUniverse[dist].minD++;
+                    districtUniverse[dist].cinD += Number(mInfo.ec || 0);
+                });
+            }
+
             setLang('vi'); 
         }
 
