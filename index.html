@@ -171,11 +171,11 @@
 
         <div class="personnel-filters">
             <div class="list-container">
-                <div class="list-label">KAM / KAE</div>
+                <div class="list-label">KAM</div>
                 <div class="scroll-list" id="kamList"></div>
             </div>
             <div class="list-container">
-                <div class="list-label">DSR / KAE</div>
+                <div class="list-label">KAE / DSR</div>
                 <div class="scroll-list" id="kaeList"></div>
             </div>
         </div>
@@ -203,7 +203,7 @@
         </div>
 
         <div class="chart-box">
-            <div class="chart-title" data-i18n="cSegmentTitle">PHÂN TÍCH HIỆU SUẤT THEO PHÂN KHÚC TUYẾN (ROUTE CLASS BY AREA)</div>
+            <div class="chart-title" data-i18n="cSegmentTitle">PHÂN TÍCH HIỆU SUẤT THEO PHÂN KHÚC KHÁCH HÀNG (CUSTOMER SEGMENT BY AREA)</div>
             <div class="chart-subtitle" id="sub-segment"></div>
             <div class="kpi-grid" id="segmentKpiContainer" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 20px;"></div>
             <div class="table-wrap" id="segmentAreaTableContainer"></div>
@@ -286,7 +286,7 @@ const dict = {
     }
 };
 
-// Đã cập nhật chú thích chính xác ở đây!
+// Map Tên Phân Khúc theo mã viết tắt
 const segNames = { 'F4': 'Tuyến F4', 'F2-1': 'Tuyến F2-1 (Ghé thăm W1 & W3)', 'F2-2': 'Tuyến F2-2 (Ghé thăm W2 & W4)', 'N': 'Chưa Rõ Tuyến' };
 const segColors = { 'F4': '#16a34a', 'F2-1': '#2563eb', 'F2-2': '#ea580c', 'N': '#64748b' };
 const monthOrder = { "jan":1, "feb":2, "mar":3, "apr":4, "may":5, "jun":6, "jul":7, "aug":8, "sep":9, "oct":10, "nov":11, "dec":12, "tháng 1":1, "tháng 2":2, "tháng 3":3, "tháng 4":4, "tháng 5":5 };
@@ -307,7 +307,7 @@ const formatWM = (w, m) => {
     return lang === 'vi' ? `${w} T${mNum}` : `${w} ${mName}`;
 };
 
-// Hàm lấy thông tin chợ từ dbMarket (nếu bạn cần dùng để vẽ thêm chỉ số sau này)
+// Hàm hỗ trợ getMarketInfo để lấy dữ liệu từ DB Market (Nối Area + Market)
 const getMarketInfo = (ar, m) => {
     if (typeof dbMarket === 'undefined') return null;
     let compKey = ar + "_" + m;
@@ -319,7 +319,7 @@ const cleanName = (name) => {
     return cleanStr;
 };
 
-// Hàm trích xuất KAM từ db. (Tạm thời map KAE lên KAM vì dữ liệu chỉ có cột K)
+// Do chưa có cột KAM nên tạm ánh xạ trực tiếp từ KAE
 const deriveKam = (kaeName) => {
     let cleanKae = cleanName(kaeName);
     if (typeof kamMap !== 'undefined' && kamMap[cleanKae]) return kamMap[cleanKae]; 
@@ -363,8 +363,8 @@ const aggregateDualData = (masterSubset, salesSubset) => {
         let currentSales = Number(d.s) || 0;
         sales += currentSales; 
         if (currentSales > 0) {
-            skuLines += 1; // 1 dòng db tương ứng 1 loại SKU bán ra
-            invoiceCount++;
+            skuLines += 1; 
+            invoiceCount++; 
             if (d.cc) salesSet.add(d.cc);
         }
     });
