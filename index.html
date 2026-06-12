@@ -114,8 +114,8 @@
         th { background-color: var(--table-header); color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; }
         tbody tr:hover { background-color: var(--primary-light); }
         
-        .first-col-sticky { font-weight: 600; color: var(--text-main); background-color: #fff; position: sticky; left: 0; z-index: 2; box-shadow: 2px 0 5px rgba(0,0,0,0.03); }
-        th.first-col-sticky { background-color: var(--table-header); z-index: 3;}
+        .first-col-sticky { font-weight: 600; color: var(--text-main); background-color: #fff; }
+        th.first-col-sticky { background-color: var(--table-header); }
         
         .text-right { text-align: right; } .text-center { text-align: center; } .text-left { text-align: left; }
         .empty-row { color: var(--text-muted); font-style: italic; text-align: center; padding: 20px; }
@@ -420,8 +420,6 @@
         let lang = 'vi';
         let filters = { month: [], week: [], hq: [], area: [], kae: [] }; 
         let dbMaster = []; let dbSales = []; let targetMonths = []; let targetWeeks = [];
-        let districtUniverse = {}; 
-        let charts = {};
 
         const t = (key) => dict[lang][key] || key;
         const fmt = (n) => new Intl.NumberFormat('en-US').format(Math.round(n || 0));
@@ -493,31 +491,32 @@
             return { s: sales, tc: totalC, ac: activeC };
         };
 
+        // 🚨 Thuật toán kiểm tra Ngày đi tuyến (Lọc Tuyến F)
+        const checkActiveWeek = (rtype, week) => {
+            if (!rtype) return true;
+            const r = String(rtype).toUpperCase().replace(/\s+/g, '');
+            const wStr = String(week).toUpperCase().trim();
+            if (r.includes('F4')) return true;
+            if (r.includes('F2-1') || r === 'F21') return wStr === 'W1' || wStr === 'W3';
+            if (r.includes('F2-2') || r === 'F22') return wStr === 'W2' || wStr === 'W4';
+            return true; 
+        };
+
         // =========================================================
         // LOGIC TỰ ĐỘNG PHÂN LOẠI & GÁN MÀU CHO TỪNG SKU
         // =========================================================
         const getSkuCategory = (skuName) => {
             let s = String(skuName).toLowerCase();
-            // Thứ tự ưu tiên quét từ khóa: Song Lân -> Cá hộp -> Miến tươi -> Miến đậu xanh -> Khác
-            if (s.includes("song lân")) return { id: "sl", name: "Song Lân", color: "#2563eb" }; // Xanh biển
-            if (s.includes("cá hộp")) return { id: "ch", name: "Cá Hộp", color: "#dc2626" }; // Đỏ
-            if (s.includes("miến tươi")) return { id: "mt", name: "Miến Tươi", color: "#059669" }; // Xanh trùng Header
-            if (s.includes("miến đậu xanh")) return { id: "mdx", name: "Miến Đậu Xanh", color: "#022c22" }; // Xanh đậm 3 tone
-            return { id: "kh", name: "Sản phẩm Khác", color: "#94a3b8" }; // Xám xám
+            if (s.includes("song lân")) return { id: "sl", name: "Song Lân", color: "var(--c-blue)" }; 
+            if (s.includes("cá hộp")) return { id: "ch", name: "Cá Hộp", color: "var(--c-red)" }; 
+            if (s.includes("miến tươi")) return { id: "mt", name: "Miến Tươi", color: "var(--c-green-header)" }; 
+            if (s.includes("miến đậu xanh")) return { id: "mdx", name: "Miến Đậu Xanh", color: "var(--c-green-dark)" }; 
+            return { id: "kh", name: "Sản phẩm Khác", color: "var(--c-gray)" }; 
         };
 
         // =========================================================
         // 2. LOGIC BỘ LỌC ĐA DỮ LIỆU & UI UX
         // =========================================================
-        function setLang(newLang) {
-            lang = newLang; 
-            document.getElementById('btn-vi').className = lang === 'vi' ? 'active' : ''; 
-            document.getElementById('btn-en').className = lang === 'en' ? 'active' : '';
-            document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n')); });
-            renderFilters(); renderDashboard();
-        }
-
-        let openMS = null;
         function toggleMS(id) {
             if(openMS && openMS !== id) document.getElementById('drop-'+openMS).style.display = 'none';
             let drop = document.getElementById('drop-'+id);
@@ -595,7 +594,8 @@
                                     (filters.hq.length === 0 || filters.hq.includes(d.hq)) && 
                                     (filters.area.length === 0 || filters.area.includes(d.ar));
             
-            const baseMaster = dbMaster.filter(baseApplyF);
+            // Ở danh sách KAE/DSR, lọc Master phải dựa trên checkActiveWeek để loại bỏ KAE có plan ảo
+            const baseMaster = dbMaster.filter(d => baseApplyF(d) && checkActiveWeek(d.r, getW(d)));
             const baseSales = dbSales.filter(baseApplyF);
             
             let masterKaesSet = new Set(baseMaster.map(d => cleanName(d.k)));
@@ -634,15 +634,21 @@
         function renderDashboard() {
             if (dbMaster.length === 0 && dbSales.length === 0) return; 
 
-            // Lọc toàn bộ data
-            const fullApplyF = d => (filters.month.length === 0 || filters.month.includes(d.mo)) && 
+            const baseApplyF = d => (filters.month.length === 0 || filters.month.includes(d.mo)) && 
                                     (filters.week.length === 0 || filters.week.includes(getW(d))) && 
                                     (filters.hq.length === 0 || filters.hq.includes(d.hq)) && 
-                                    (filters.area.length === 0 || filters.area.includes(d.ar)) &&
-                                    (filters.kae.length === 0 || filters.kae.includes(cleanName(d.k)));
+                                    (filters.area.length === 0 || filters.area.includes(d.ar));
             
-            const fMaster = dbMaster.filter(fullApplyF);
-            const fSales = dbSales.filter(fullApplyF);
+            // 🚨 Áp dụng checkActiveWeek cho Master Plan để gỡ số liệu ảo (Tuyến F2-1 đi W2, F2-2 đi W1...)
+            const masterFullApplyF = d => baseApplyF(d) && 
+                                          (filters.kae.length === 0 || filters.kae.includes(cleanName(d.k))) &&
+                                          checkActiveWeek(d.r, getW(d));
+
+            const salesFullApplyF = d => baseApplyF(d) && 
+                                         (filters.kae.length === 0 || filters.kae.includes(cleanName(d.k)));
+            
+            const fMaster = dbMaster.filter(masterFullApplyF);
+            const fSales = dbSales.filter(salesFullApplyF);
 
             // ================== KPI CARDS ==================
             const sysKPI = aggregateDualData(fMaster, fSales);
@@ -659,7 +665,7 @@
             targetWeeks = [...new Set(baseDataWeekly.map(d => getW(d)))].filter(Boolean).sort();
 
             // ================== DAILY TRACKING ==================
-            document.getElementById('head-daily').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colMetric')}</th>${[0,1,2,3,4,5].map(i => `<th class="text-center">${t('days')[i]}</th>`).join('')}<th class="text-center" style="font-weight: bold; background-color: var(--table-header); color: #000; z-index:1;">${t('colTotalW')}</th>`;
+            document.getElementById('head-daily').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colMetric')}</th>${[0,1,2,3,4,5].map(i => `<th class="text-center">${t('days')[i]}</th>`).join('')}<th class="text-center" style="font-weight: bold; background-color: var(--table-header); color: #000;">${t('colTotalW')}</th>`;
             
             let dailyObj = {};
             [0,1,2,3,4,5].forEach(idx => dailyObj[idx] = { mPlan: new Set(), mAct: new Set(), oPlan: new Set(), oAct: new Set(), sales: 0 });
@@ -687,7 +693,7 @@
             `;
 
             // ================== WEEKLY TRACKING ==================
-            document.getElementById('head-weekly').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colMetric')}</th>${targetWeeks.map(w => `<th class="text-center">${w}</th>`).join('')}<th class="text-center" style="font-weight: bold; background-color: var(--table-header); color: #000; z-index:1;">${t('colTotalM')}</th>`;
+            document.getElementById('head-weekly').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colMetric')}</th>${targetWeeks.map(w => `<th class="text-center">${w}</th>`).join('')}<th class="text-center" style="font-weight: bold; background-color: var(--table-header); color: #000;">${t('colTotalM')}</th>`;
             
             let weekObj = {}; targetWeeks.forEach(w => weekObj[w] = { mPlan: new Set(), mAct: new Set(), oPlan: new Set(), oAct: new Set(), sales: 0 });
             fMaster.forEach(r => { let w = getW(r); if(weekObj[w]) { if(r.m) weekObj[w].mPlan.add(r.m); if(r.cc) weekObj[w].oPlan.add(r.cc); } });
@@ -713,8 +719,7 @@
             `;
 
             // ================== MONTHLY TRACKING ==================
-            // 🔥 Cập nhật cấu trúc giống Weekly/Daily
-            document.getElementById('head-monthly').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colMetric')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header); color: #000; z-index:1;">${t('colTotal')}</th>`;
+            document.getElementById('head-monthly').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colMetric')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header); color: #000;">${t('colTotal')}</th>`;
             
             let monthObj = {}; targetMonths.forEach(m => monthObj[m] = { mPlan: new Set(), mAct: new Set(), oPlan: new Set(), oAct: new Set(), sales: 0 });
             
@@ -742,34 +747,41 @@
 
             // ================== OVERVIEW ĐỊA BÀN ==================
             let distMap = {};
-            Object.keys(districtUniverse).forEach(k => { distMap[k] = { minD: districtUniverse[k].minD, cinD: districtUniverse[k].cinD, mAct: new Set(), oAct: new Set(), sales: 0 }; });
             
+            // Lấy kế hoạch động (trên tuyến)
+            fMaster.forEach(r => {
+                let info = getMarketInfo(r.ar, r.m); let dist = info ? info.di : 'Chưa Rõ';
+                if (!distMap[dist]) distMap[dist] = { mPlan: new Set(), oPlan: new Set(), mAct: new Set(), oAct: new Set(), sales: 0 };
+                if (r.m) distMap[dist].mPlan.add(r.m);
+                if (r.cc) distMap[dist].oPlan.add(r.cc);
+            });
+
+            // Lấy thực tế
             fSales.forEach(r => {
                 let info = getMarketInfo(r.ar, r.m); let dist = info ? info.di : 'Chưa Rõ';
-                if (!distMap[dist]) distMap[dist] = { minD: 0, cinD: 0, mAct: new Set(), oAct: new Set(), sales: 0 };
+                if (!distMap[dist]) distMap[dist] = { mPlan: new Set(), oPlan: new Set(), mAct: new Set(), oAct: new Set(), sales: 0 };
                 if (r.m) distMap[dist].mAct.add(r.m);
                 if (r.cc) distMap[dist].oAct.add(r.cc);
                 distMap[dist].sales += Number(r.s || 0);
             });
 
-            let distArray = Object.keys(distMap).map(k => ({ dist: k, ...distMap[k] })).filter(d => d.mAct.size > 0 || d.sales > 0);
+            let distArray = Object.keys(distMap).map(k => ({ dist: k, ...distMap[k] })).filter(d => d.mPlan.size > 0 || d.mAct.size > 0 || d.sales > 0);
             distArray.sort((a,b) => b.sales - a.sales);
 
             document.getElementById('tb-overview').innerHTML = distArray.length === 0 ? `<tr><td colspan="8" class="empty-row">${t('noData')}</td></tr>` : distArray.map(d => `
                 <tr>
                     <td class="first-col-sticky" style="font-weight:600;">${d.dist}</td>
-                    <td class="text-right">${d.minD || '-'}</td>
+                    <td class="text-right">${d.mPlan.size || '-'}</td>
                     <td class="text-right" style="font-weight:600; color:#000;">${d.mAct.size}</td>
-                    <td class="text-right" style="font-weight:700; color:var(--primary);">${formatPct(d.mAct.size, d.minD)}</td>
-                    <td class="text-right">${d.cinD || '-'}</td>
+                    <td class="text-right" style="font-weight:700; color:var(--primary);">${formatPct(d.mAct.size, d.mPlan.size)}</td>
+                    <td class="text-right">${d.oPlan.size || '-'}</td>
                     <td class="text-right" style="font-weight:600; color:#000;">${d.oAct.size}</td>
-                    <td class="text-right" style="font-weight:700; color:var(--primary);">${formatPct(d.oAct.size, d.cinD)}</td>
+                    <td class="text-right" style="font-weight:700; color:var(--primary);">${formatPct(d.oAct.size, d.oPlan.size)}</td>
                     <td class="text-right" style="font-weight:700;">${fmt(d.sales)}</td>
                 </tr>`).join('');
 
             // ================== TOP 20 CHỢ ==================
-            // Sửa colKae thành "Nhân Viên" và bỏ Freeze
-            document.getElementById('head-top-markets').innerHTML = `<th class="first-col-sticky">${t('colMarket')}</th><th>${t('colDistrict')}</th><th>${t('colKae')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header); z-index:1;">${t('colTotal')}</th>`;
+            document.getElementById('head-top-markets').innerHTML = `<th class="first-col-sticky">${t('colMarket')}</th><th>${t('colDistrict')}</th><th>${t('colKae')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header);">${t('colTotal')}</th>`;
             
             let mTop = {};
             fSales.forEach(r => {
@@ -781,7 +793,6 @@
                     mTop[mk] = { name: mk, district: dist, kaesAtLatest: new Set([cleanName(r.k)]), latestTime: tVal, months: {}, total: 0 }; 
                     targetMonths.forEach(m => mTop[mk].months[m] = 0); 
                 } else {
-                    // Logic Snapshot: Luôn ưu tiên tên KAE của thời gian mới nhất (Tháng lớn nhất -> Tuần lớn nhất)
                     if(tVal > mTop[mk].latestTime) {
                         mTop[mk].latestTime = tVal;
                         mTop[mk].kaesAtLatest = new Set([cleanName(r.k)]);
@@ -801,8 +812,7 @@
                 <td class="text-right" style="font-weight:700; background-color:var(--background);">${fmt(mk.total)}</td></tr>`).join('');
 
             // ================== TOP 20 KHÁCH HÀNG ==================
-            // Tương tự, dùng Logic Snapshot cho khách hàng
-            document.getElementById('head-top-customers').innerHTML = `<th class="first-col-sticky">${t('colCuscode')}</th><th>${t('colCusname')}</th><th>${t('colBelongM')}</th><th>${t('colKae')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header); z-index:1;">${t('colTotal')}</th>`;
+            document.getElementById('head-top-customers').innerHTML = `<th class="first-col-sticky">${t('colCuscode')}</th><th>${t('colCusname')}</th><th>${t('colBelongM')}</th><th>${t('colKae')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header);">${t('colTotal')}</th>`;
             
             let cTop = {};
             fSales.forEach(r => {
@@ -832,20 +842,17 @@
                 <td class="text-right" style="font-weight:700; background-color:var(--background);">${fmt(c.total)}</td></tr>`).join('');
 
             // ================== SKU (BẢNG LỚN + BIỂU ĐỒ) ==================
-            document.getElementById('head-sku').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colSku')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header); z-index:1;">${t('colTotal')}</th>`;
+            document.getElementById('head-sku').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colSku')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header);">${t('colTotal')}</th>`;
             
             let sTop = {};      
             let catGroup = {};  
             let grandTotalSales = 0;
-            let grandTotalQty = 0;
 
-            // 1. Phân loại và Cộng dồn Số lượng (qt) & Doanh số (s)
             fSales.forEach(r => {
                 const sku = r.sku; if(!sku) return;
                 let saleVal = Number(r.s || 0);
-                let qtyVal = Number(r.qt || 0); // Lấy số lượng thùng/gói
+                let qtyVal = Number(r.qt || 0); 
                 
-                // Gom vào SKU nhỏ
                 if(!sTop[sku]) { 
                     sTop[sku] = { name: sku, months: {}, total: 0, qty: 0 }; 
                     targetMonths.forEach(m => sTop[sku].months[m] = 0); 
@@ -854,7 +861,6 @@
                 sTop[sku].total += saleVal;
                 sTop[sku].qty += qtyVal;
 
-                // Gom vào Category Nhóm Lớn
                 let catObj = getSkuCategory(sku);
                 if(!catGroup[catObj.id]) {
                     catGroup[catObj.id] = { id: catObj.id, name: catObj.name, color: catObj.color, total: 0, qty: 0, items: [] };
@@ -863,17 +869,16 @@
                 catGroup[catObj.id].qty += qtyVal;
                 
                 grandTotalSales += saleVal;
-                grandTotalQty += qtyVal;
             });
 
-            // 2. Vẽ Bảng Lớn (80%)
+            // Vẽ Bảng Lớn
             const topSArr = Object.values(sTop).sort((a,b) => b.total - a.total);
             document.getElementById('tb-sku').innerHTML = topSArr.length === 0 ? `<tr><td colspan="15" class="empty-row">${t('noData')}</td></tr>` : topSArr.map(s => `
                 <tr><td class="first-col-sticky text-left">${s.name}</td>
                 ${targetMonths.map(m => `<td class="text-right">${s.months[m] > 0 ? fmt(s.months[m]) : '-'}</td>`).join('')}
                 <td class="text-right" style="font-weight:700; color:var(--primary); background-color:var(--background);">${fmt(s.total)}</td></tr>`).join('');
 
-            // 3. Chuẩn bị dữ liệu cho Chart và Bảng phụ
+            // Chuẩn bị dữ liệu cho Chart và Bảng phụ
             let validCats = Object.values(catGroup).filter(c => c.total > 0).sort((a,b) => b.total - a.total);
             
             if(charts['skuDoughnut']) charts['skuDoughnut'].destroy();
@@ -885,13 +890,9 @@
             } else {
                 document.getElementById('chartCenterText').style.display = 'block';
                 
-                // 🔥 THUẬT TOÁN VISUAL PADDING & BẬC THANG (OFFSET) 🔥
-                // Đảm bảo lát cắt nhỏ nhất cũng hiển thị ít nhất 2.5% để dễ click
                 const minVisual = grandTotalSales * 0.025; 
                 const visualData = validCats.map(c => Math.max(c.total, minVisual));
-                
-                // Cấp bậc Offset xô lệch cho từng lát cắt để tạo "chiều cao" (bán kính ngoài) khác nhau
-                const offsets = validCats.map((c, i) => i * 4); // Ví dụ: [0, 4, 8, 12, 16]
+                const offsets = validCats.map((c, i) => i * 4); 
 
                 const ctx = document.getElementById('skuDoughnut').getContext('2d');
                 charts['skuDoughnut'] = new Chart(ctx, {
@@ -923,7 +924,7 @@
                                 const idx = elements[0].index;
                                 const cat = validCats[idx];
                                 pctEl.innerText = ((cat.total / grandTotalSales) * 100).toFixed(1) + '%';
-                                pctEl.style.color = cat.color;
+                                pctEl.style.color = chart.data.datasets[0].backgroundColor[idx];
                                 lblEl.innerText = cat.name;
                             } else {
                                 pctEl.innerText = '100%';
@@ -975,27 +976,7 @@
             }
         }
 
-        // =========================================================
-        // 4. KHỞI TẠO HỆ THỐNG
-        // =========================================================
         function init() {
-            dbMaster = []; dbSales = [];
-            if (typeof dbMasterM5 !== 'undefined') dbMaster = dbMaster.concat(dbMasterM5);
-            if (typeof dbSalesM5 !== 'undefined')  dbSales  = dbSales.concat(dbSalesM5);
-            if (typeof dbMasterM6 !== 'undefined') dbMaster = dbMaster.concat(dbMasterM6);
-            if (typeof dbSalesM6 !== 'undefined')  dbSales  = dbSales.concat(dbSalesM6);
-
-            // Xử lý dữ liệu Chợ và Quận Huyện
-            if (typeof dbMarket !== 'undefined') {
-                Object.keys(dbMarket).forEach(key => {
-                    let mInfo = dbMarket[key];
-                    let dist = mInfo.di || 'Chưa Rõ';
-                    if (!districtUniverse[dist]) districtUniverse[dist] = { minD: 0, cinD: 0 };
-                    districtUniverse[dist].minD++;
-                    districtUniverse[dist].cinD += Number(mInfo.ec || 0);
-                });
-            }
-
             setLang('vi'); 
         }
 
