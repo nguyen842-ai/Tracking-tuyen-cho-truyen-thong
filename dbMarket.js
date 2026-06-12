@@ -92,7 +92,7 @@ const dbMarket = {
 "1. HCMC_Chợ Hồ Thị Kỷ": { di: "Quận 10", ec: 5 },
 "1. HCMC_Chợ Hòa Hưng": { di: "Quận 10", ec: 10 },
 "1. HCMC_Chợ Lê Hồng Phong": { di: "Quận 10", ec: 8 },
-"1. HCMC_Chợ Nguyễn Tri Phương": { di: "Quận 10", ec: 19 },
+"1. HCMC_Chợ Nguyễn Tri phương": { di: "Quận 10", ec: 19 },
 "1. HCMC_Chợ Nhật Tảo": { di: "Quận 10", ec: 6 },
 "1. HCMC_Chợ Phường 10": { di: "Quận 10", ec: 4 },
 "1. HCMC_Chợ Phường 2": { di: "Quận 10", ec: 4 },
