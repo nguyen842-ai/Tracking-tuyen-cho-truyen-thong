@@ -367,6 +367,10 @@
     <script src="dataM6.js"></script>
 
     <script>
+        // BỔ SUNG 2 BIẾN TOÀN CỤC BỊ THIẾU Ở ĐÂY 👇
+        let districtUniverse = {}; 
+        let charts = {};
+
         // =========================================================
         // 1. TỪ ĐIỂN ĐA NGÔN NGỮ & CONFIG CƠ BẢN
         // =========================================================
@@ -507,11 +511,12 @@
         // =========================================================
         const getSkuCategory = (skuName) => {
             let s = String(skuName).toLowerCase();
-            if (s.includes("song lân")) return { id: "sl", name: "Song Lân", color: "var(--c-blue)" }; 
-            if (s.includes("cá hộp")) return { id: "ch", name: "Cá Hộp", color: "var(--c-red)" }; 
-            if (s.includes("miến tươi")) return { id: "mt", name: "Miến Tươi", color: "var(--c-green-header)" }; 
-            if (s.includes("miến đậu xanh")) return { id: "mdx", name: "Miến Đậu Xanh", color: "var(--c-green-dark)" }; 
-            return { id: "kh", name: "Sản phẩm Khác", color: "var(--c-gray)" }; 
+            // Thứ tự ưu tiên quét từ khóa: Song Lân -> Cá hộp -> Miến tươi -> Miến đậu xanh -> Khác
+            if (s.includes("song lân")) return { id: "sl", name: "Song Lân", color: "#2563eb" }; // Xanh biển
+            if (s.includes("cá hộp")) return { id: "ch", name: "Cá Hộp", color: "#dc2626" }; // Đỏ
+            if (s.includes("miến tươi")) return { id: "mt", name: "Miến Tươi", color: "#059669" }; // Xanh trùng Header
+            if (s.includes("miến đậu xanh")) return { id: "mdx", name: "Miến Đậu Xanh", color: "#022c22" }; // Xanh đậm 3 tone
+            return { id: "kh", name: "Sản phẩm Khác", color: "#94a3b8" }; // Xám xám
         };
 
         // =========================================================
@@ -677,7 +682,7 @@
             targetWeeks = [...new Set(baseDataWeekly.map(d => getW(d)))].filter(Boolean).sort();
 
             // ================== DAILY TRACKING ==================
-            document.getElementById('head-daily').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colMetric')}</th>${[0,1,2,3,4,5].map(i => `<th class="text-center">${t('days')[i]}</th>`).join('')}<th class="text-center" style="font-weight: bold; background-color: var(--table-header); color: #000; z-index:1;">${t('colTotalW')}</th>`;
+            document.getElementById('head-daily').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colMetric')}</th>${[0,1,2,3,4,5].map(i => `<th class="text-center">${t('days')[i]}</th>`).join('')}<th class="text-center" style="font-weight: bold; background-color: var(--table-header); color: #000;">${t('colTotalW')}</th>`;
             
             let dailyObj = {};
             [0,1,2,3,4,5].forEach(idx => dailyObj[idx] = { mPlan: new Set(), mAct: new Set(), oPlan: new Set(), oAct: new Set(), sales: 0 });
@@ -732,7 +737,7 @@
 
             // ================== MONTHLY TRACKING ==================
             // 🔥 Cập nhật cấu trúc giống Weekly/Daily
-            document.getElementById('head-monthly').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colMetric')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header); color: #000; z-index:1;">${t('colTotal')}</th>`;
+            document.getElementById('head-monthly').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colMetric')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header); color: #000;">${t('colTotal')}</th>`;
             
             let monthObj = {}; targetMonths.forEach(m => monthObj[m] = { mPlan: new Set(), mAct: new Set(), oPlan: new Set(), oAct: new Set(), sales: 0 });
             
@@ -795,7 +800,7 @@
 
             // ================== TOP 20 CHỢ ==================
             // Sửa colKae thành "Nhân Viên" và bỏ Freeze
-            document.getElementById('head-top-markets').innerHTML = `<th class="first-col-sticky">${t('colMarket')}</th><th>${t('colDistrict')}</th><th>${t('colKae')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header); z-index:1;">${t('colTotal')}</th>`;
+            document.getElementById('head-top-markets').innerHTML = `<th class="first-col-sticky">${t('colMarket')}</th><th>${t('colDistrict')}</th><th>${t('colKae')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header);">${t('colTotal')}</th>`;
             
             let mTop = {};
             fSales.forEach(r => {
@@ -828,7 +833,7 @@
 
             // ================== TOP 20 KHÁCH HÀNG ==================
             // Tương tự, dùng Logic Snapshot cho khách hàng
-            document.getElementById('head-top-customers').innerHTML = `<th class="first-col-sticky">${t('colCuscode')}</th><th>${t('colCusname')}</th><th>${t('colBelongM')}</th><th>${t('colKae')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header); z-index:1;">${t('colTotal')}</th>`;
+            document.getElementById('head-top-customers').innerHTML = `<th class="first-col-sticky">${t('colCuscode')}</th><th>${t('colCusname')}</th><th>${t('colBelongM')}</th><th>${t('colKae')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header);">${t('colTotal')}</th>`;
             
             let cTop = {};
             fSales.forEach(r => {
@@ -858,7 +863,7 @@
                 <td class="text-right" style="font-weight:700; background-color:var(--background);">${fmt(c.total)}</td></tr>`).join('');
 
             // ================== SKU (BẢNG LỚN + BIỂU ĐỒ) ==================
-            document.getElementById('head-sku').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colSku')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header); z-index:1;">${t('colTotal')}</th>`;
+            document.getElementById('head-sku').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colSku')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header);">${t('colTotal')}</th>`;
             
             let sTop = {};      
             let catGroup = {};  
