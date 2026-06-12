@@ -367,7 +367,7 @@
     <script src="dataM6.js"></script>
 
     <script>
-        // BỔ SUNG 2 BIẾN TOÀN CỤC BỊ THIẾU Ở ĐÂY 👇
+        // BỔ SUNG BIẾN TOÀN CỤC Ở ĐÂY 👇
         let districtUniverse = {}; 
         let charts = {};
 
@@ -427,7 +427,6 @@
 
         const t = (key) => dict[lang][key] || key;
         const fmt = (n) => new Intl.NumberFormat('en-US').format(Math.round(n || 0));
-        // Giữ lại số lẻ cho hiển thị số lượng (Qty)
         const fmtQty = (n) => new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(Number(n) || 0);
         const formatPct = (num, den) => (!den || den === 0) ? '0.0%' : ((num / den) * 100).toFixed(1) + '%';
         const getW = (d) => String(d.w || "").toUpperCase().trim();
@@ -438,7 +437,6 @@
             return (lang === 'vi' && mNum) ? `T${mNum}` : String(m).charAt(0).toUpperCase() + String(m).slice(1).toLowerCase();
         };
 
-        // Hàm hỗ trợ tính giá trị thời gian tuyệt đối (Dùng để tìm Snapshot mới nhất)
         const getAbsoluteTime = (mo, w) => {
             let mVal = monthOrder[String(mo).toLowerCase()] || 0;
             let wVal = parseInt(String(w).replace(/\D/g, '')) || 0;
@@ -511,12 +509,11 @@
         // =========================================================
         const getSkuCategory = (skuName) => {
             let s = String(skuName).toLowerCase();
-            // Thứ tự ưu tiên quét từ khóa: Song Lân -> Cá hộp -> Miến tươi -> Miến đậu xanh -> Khác
-            if (s.includes("song lân")) return { id: "sl", name: "Song Lân", color: "#2563eb" }; // Xanh biển
-            if (s.includes("cá hộp")) return { id: "ch", name: "Cá Hộp", color: "#dc2626" }; // Đỏ
-            if (s.includes("miến tươi")) return { id: "mt", name: "Miến Tươi", color: "#059669" }; // Xanh trùng Header
-            if (s.includes("miến đậu xanh")) return { id: "mdx", name: "Miến Đậu Xanh", color: "#022c22" }; // Xanh đậm 3 tone
-            return { id: "kh", name: "Sản phẩm Khác", color: "#94a3b8" }; // Xám xám
+            if (s.includes("song lân")) return { id: "sl", name: "Song Lân", color: "#2563eb" }; 
+            if (s.includes("cá hộp")) return { id: "ch", name: "Cá Hộp", color: "#dc2626" }; 
+            if (s.includes("miến tươi")) return { id: "mt", name: "Miến Tươi", color: "#059669" }; 
+            if (s.includes("miến đậu xanh")) return { id: "mdx", name: "Miến Đậu Xanh", color: "#022c22" }; 
+            return { id: "kh", name: "Sản phẩm Khác", color: "#94a3b8" }; 
         };
 
         // =========================================================
@@ -527,10 +524,7 @@
             document.getElementById('btn-vi').className = lang === 'vi' ? 'active' : ''; 
             document.getElementById('btn-en').className = lang === 'en' ? 'active' : '';
             document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n')); });
-            
-            // Xử lý lại text riêng cho Dropdown "Tất cả" vì nội dung này gen trong JS
-            renderFilters(); 
-            renderDashboard();
+            renderFilters(); renderDashboard();
         }
 
         let openMS = null;
@@ -611,7 +605,6 @@
                                     (filters.hq.length === 0 || filters.hq.includes(d.hq)) && 
                                     (filters.area.length === 0 || filters.area.includes(d.ar));
             
-            // Ở danh sách Nhân viên, lọc Master phải dựa trên checkActiveWeek để loại bỏ plan ảo
             const baseMaster = dbMaster.filter(d => baseApplyF(d) && checkActiveWeek(d.r, getW(d)));
             const baseSales = dbSales.filter(baseApplyF);
             
@@ -656,7 +649,6 @@
                                     (filters.hq.length === 0 || filters.hq.includes(d.hq)) && 
                                     (filters.area.length === 0 || filters.area.includes(d.ar));
             
-            // 🚨 Áp dụng checkActiveWeek cho Master Plan để gỡ số liệu ảo (Tuyến F2-1 đi W2, F2-2 đi W1...)
             const masterFullApplyF = d => baseApplyF(d) && 
                                           (filters.kae.length === 0 || filters.kae.includes(cleanName(d.k))) &&
                                           checkActiveWeek(d.r, getW(d));
@@ -674,7 +666,6 @@
             document.getElementById("val-strike").innerText = fmt(sysKPI.ac);
             document.getElementById("val-strike-rate").innerText = formatPct(sysKPI.ac, sysKPI.tc);
 
-            // Bóc tách Months & Weeks hiện có để vẽ Header động
             targetMonths = [...new Set([...fMaster, ...fSales].map(d => d.mo))].filter(Boolean);
             targetMonths.sort((a,b) => (monthOrder[String(a).toLowerCase()]||99) - (monthOrder[String(b).toLowerCase()]||99));
             
@@ -736,7 +727,6 @@
             `;
 
             // ================== MONTHLY TRACKING ==================
-            // 🔥 Cập nhật cấu trúc giống Weekly/Daily
             document.getElementById('head-monthly').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colMetric')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header); color: #000;">${t('colTotal')}</th>`;
             
             let monthObj = {}; targetMonths.forEach(m => monthObj[m] = { mPlan: new Set(), mAct: new Set(), oPlan: new Set(), oAct: new Set(), sales: 0 });
@@ -766,40 +756,52 @@
             // ================== OVERVIEW ĐỊA BÀN ==================
             let distMap = {};
             
-            // Lấy kế hoạch động (trên tuyến)
-            fMaster.forEach(r => {
-                let info = getMarketInfo(r.ar, r.m); let dist = info ? info.di : 'Chưa Rõ';
-                if (!distMap[dist]) distMap[dist] = { mPlan: new Set(), oPlan: new Set(), mAct: new Set(), oAct: new Set(), sales: 0 };
-                if (r.m) distMap[dist].mPlan.add(r.m);
-                if (r.cc) distMap[dist].oPlan.add(r.cc);
+            // 1. Khôi phục lại logic tính Universe tuyệt đối từ dbMarket
+            Object.keys(districtUniverse).forEach(k => { 
+                distMap[k] = { 
+                    minD: districtUniverse[k].minD, 
+                    cinD: districtUniverse[k].cinD, 
+                    mAct: new Set(), 
+                    oAct: new Set(), 
+                    sales: 0 
+                }; 
             });
 
-            // Lấy thực tế
+            // 2. Xác định các Quận/Huyện có trong kế hoạch thực tế (để tránh hiển thị các quận trống không liên quan)
+            let plannedDistricts = new Set();
+            fMaster.forEach(r => {
+                let info = getMarketInfo(r.ar, r.m); let dist = info ? info.di : 'Chưa Rõ';
+                plannedDistricts.add(dist);
+            });
+
+            // 3. Cập nhật Thực tế từ fSales
             fSales.forEach(r => {
                 let info = getMarketInfo(r.ar, r.m); let dist = info ? info.di : 'Chưa Rõ';
-                if (!distMap[dist]) distMap[dist] = { mPlan: new Set(), oPlan: new Set(), mAct: new Set(), oAct: new Set(), sales: 0 };
+                if (!distMap[dist]) distMap[dist] = { minD: 0, cinD: 0, mAct: new Set(), oAct: new Set(), sales: 0 };
                 if (r.m) distMap[dist].mAct.add(r.m);
                 if (r.cc) distMap[dist].oAct.add(r.cc);
                 distMap[dist].sales += Number(r.s || 0);
             });
 
-            let distArray = Object.keys(distMap).map(k => ({ dist: k, ...distMap[k] })).filter(d => d.mPlan.size > 0 || d.mAct.size > 0 || d.sales > 0);
+            let distArray = Object.keys(distMap)
+                .map(k => ({ dist: k, ...distMap[k] }))
+                .filter(d => plannedDistricts.has(d.dist) || d.mAct.size > 0 || d.sales > 0);
+                
             distArray.sort((a,b) => b.sales - a.sales);
 
             document.getElementById('tb-overview').innerHTML = distArray.length === 0 ? `<tr><td colspan="8" class="empty-row">${t('noData')}</td></tr>` : distArray.map(d => `
                 <tr>
                     <td class="first-col-sticky" style="font-weight:600;">${d.dist}</td>
-                    <td class="text-right">${d.mPlan.size || '-'}</td>
+                    <td class="text-right">${d.minD || '-'}</td>
                     <td class="text-right" style="font-weight:600; color:#000;">${d.mAct.size}</td>
-                    <td class="text-right" style="font-weight:700; color:var(--primary);">${formatPct(d.mAct.size, d.mPlan.size)}</td>
-                    <td class="text-right">${d.oPlan.size || '-'}</td>
+                    <td class="text-right" style="font-weight:700; color:var(--primary);">${formatPct(d.mAct.size, d.minD)}</td>
+                    <td class="text-right">${d.cinD || '-'}</td>
                     <td class="text-right" style="font-weight:600; color:#000;">${d.oAct.size}</td>
-                    <td class="text-right" style="font-weight:700; color:var(--primary);">${formatPct(d.oAct.size, d.oPlan.size)}</td>
+                    <td class="text-right" style="font-weight:700; color:var(--primary);">${formatPct(d.oAct.size, d.cinD)}</td>
                     <td class="text-right" style="font-weight:700;">${fmt(d.sales)}</td>
                 </tr>`).join('');
 
             // ================== TOP 20 CHỢ ==================
-            // Sửa colKae thành "Nhân Viên" và bỏ Freeze
             document.getElementById('head-top-markets').innerHTML = `<th class="first-col-sticky">${t('colMarket')}</th><th>${t('colDistrict')}</th><th>${t('colKae')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header);">${t('colTotal')}</th>`;
             
             let mTop = {};
@@ -812,7 +814,6 @@
                     mTop[mk] = { name: mk, district: dist, kaesAtLatest: new Set([cleanName(r.k)]), latestTime: tVal, months: {}, total: 0 }; 
                     targetMonths.forEach(m => mTop[mk].months[m] = 0); 
                 } else {
-                    // Logic Snapshot: Luôn ưu tiên tên KAE của thời gian mới nhất (Tháng lớn nhất -> Tuần lớn nhất)
                     if(tVal > mTop[mk].latestTime) {
                         mTop[mk].latestTime = tVal;
                         mTop[mk].kaesAtLatest = new Set([cleanName(r.k)]);
@@ -832,7 +833,6 @@
                 <td class="text-right" style="font-weight:700; background-color:var(--background);">${fmt(mk.total)}</td></tr>`).join('');
 
             // ================== TOP 20 KHÁCH HÀNG ==================
-            // Tương tự, dùng Logic Snapshot cho khách hàng
             document.getElementById('head-top-customers').innerHTML = `<th class="first-col-sticky">${t('colCuscode')}</th><th>${t('colCusname')}</th><th>${t('colBelongM')}</th><th>${t('colKae')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header);">${t('colTotal')}</th>`;
             
             let cTop = {};
@@ -870,13 +870,11 @@
             let grandTotalSales = 0;
             let grandTotalQty = 0;
 
-            // 1. Phân loại và Cộng dồn Số lượng (qt) & Doanh số (s)
             fSales.forEach(r => {
                 const sku = r.sku; if(!sku) return;
                 let saleVal = Number(r.s || 0);
-                let qtyVal = Number(r.qt || 0); // Lấy số lượng thùng/gói
+                let qtyVal = Number(r.qt || 0); 
                 
-                // Gom vào SKU nhỏ
                 if(!sTop[sku]) { 
                     sTop[sku] = { name: sku, months: {}, total: 0, qty: 0 }; 
                     targetMonths.forEach(m => sTop[sku].months[m] = 0); 
@@ -885,7 +883,6 @@
                 sTop[sku].total += saleVal;
                 sTop[sku].qty += qtyVal;
 
-                // Gom vào Category Nhóm Lớn
                 let catObj = getSkuCategory(sku);
                 if(!catGroup[catObj.id]) {
                     catGroup[catObj.id] = { id: catObj.id, name: catObj.name, color: catObj.color, total: 0, qty: 0, items: [] };
@@ -897,14 +894,12 @@
                 grandTotalQty += qtyVal;
             });
 
-            // 2. Vẽ Bảng Lớn (80%)
             const topSArr = Object.values(sTop).sort((a,b) => b.total - a.total);
             document.getElementById('tb-sku').innerHTML = topSArr.length === 0 ? `<tr><td colspan="15" class="empty-row">${t('noData')}</td></tr>` : topSArr.map(s => `
                 <tr><td class="first-col-sticky text-left">${s.name}</td>
                 ${targetMonths.map(m => `<td class="text-right">${s.months[m] > 0 ? fmt(s.months[m]) : '-'}</td>`).join('')}
                 <td class="text-right" style="font-weight:700; color:var(--primary); background-color:var(--background);">${fmt(s.total)}</td></tr>`).join('');
 
-            // 3. Chuẩn bị dữ liệu cho Chart và Bảng phụ
             let validCats = Object.values(catGroup).filter(c => c.total > 0).sort((a,b) => b.total - a.total);
             
             if(charts['skuDoughnut']) charts['skuDoughnut'].destroy();
@@ -916,13 +911,9 @@
             } else {
                 document.getElementById('chartCenterText').style.display = 'block';
                 
-                // 🔥 THUẬT TOÁN VISUAL PADDING & BẬC THANG (OFFSET) 🔥
-                // Đảm bảo lát cắt nhỏ nhất cũng hiển thị ít nhất 2.5% để dễ click
                 const minVisual = grandTotalSales * 0.025; 
                 const visualData = validCats.map(c => Math.max(c.total, minVisual));
-                
-                // Cấp bậc Offset xô lệch cho từng lát cắt để tạo "chiều cao" (bán kính ngoài) khác nhau
-                const offsets = validCats.map((c, i) => i * 4); // Ví dụ: [0, 4, 8, 12, 16]
+                const offsets = validCats.map((c, i) => i * 4); 
 
                 const ctx = document.getElementById('skuDoughnut').getContext('2d');
                 charts['skuDoughnut'] = new Chart(ctx, {
@@ -945,7 +936,7 @@
                         layout: { padding: 5 },
                         plugins: {
                             legend: { display: false },
-                            tooltip: { enabled: false } // Tắt tooltip khi hover
+                            tooltip: { enabled: false } 
                         },
                         onHover: (e, elements, chart) => {
                             const pctEl = document.getElementById('ccPct');
@@ -965,7 +956,6 @@
                     }
                 });
 
-                // Cập nhật Legend bên dưới biểu đồ
                 let legendHtml = validCats.map((c, idx) => {
                     let cColor = c.color.startsWith('var') ? getComputedStyle(document.documentElement).getPropertyValue(c.color.match(/var\((.*?)\)/)[1]).trim() : c.color;
                     return `
@@ -976,7 +966,6 @@
                 }).join('');
                 document.getElementById('skuCustomLegend').innerHTML = legendHtml;
 
-                // Vẽ Bảng Phụ Chi Tiết
                 topSArr.forEach(s => {
                     let cat = getSkuCategory(s.name);
                     if (catGroup[cat.id]) { catGroup[cat.id].items.push(s); }
