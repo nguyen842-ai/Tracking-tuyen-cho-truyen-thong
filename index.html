@@ -13,6 +13,7 @@
             --sidebar-width: 440px;
         }
         
+        /* 🔥 Xóa hiệu ứng chớp xám khi chạm ngón tay trên Android 🔥 */
         * { -webkit-tap-highlight-color: transparent; }
 
         body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; background-color: #f0f4f8; color: var(--b7); font-size: 13px; overflow-x: hidden; }
@@ -60,7 +61,7 @@
         .personnel-filters { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex-grow: 1; overflow: hidden; margin-top: 5px; }
         .list-container { display: flex; flex-direction: column; height: 100%; border: 1px solid var(--b2); border-radius: 6px; overflow: hidden; }
         .list-label { font-size: 11px; font-weight: 700; color: white; background: var(--b5); padding: 12px; text-align: center; }
-        .scroll-list { overflow-y: auto; flex-grow: 1; background: #fff; overscroll-behavior-y: contain; } 
+        .scroll-list { overflow-y: auto; flex-grow: 1; background: #fff; overscroll-behavior-y: contain; } /* Ngăn chặn vuốt danh sách làm giật cả trang web trên Android */
         .list-item { padding: 12px 14px; border-bottom: 1px solid #f1f5f9; cursor: pointer; font-size: 11px; transition: 0.2s; user-select: none;}
         .list-item:hover { background: var(--b1); }
         .list-item.selected { background: var(--b4); color: white; font-weight: 600; }
@@ -84,6 +85,7 @@
         .chart-title::before { content: ""; display: inline-block; width: 4px; height: 18px; background: var(--b4); margin-right: 10px; }
         .chart-subtitle { font-size: 12px; font-weight: 600; color: #16a34a; margin-bottom: 25px; padding-left: 14px; text-transform: uppercase; font-style: italic; }
         
+        /* 🔥 CHỐNG TRƯỢT NHẦM KHI VUỐT BẢNG NGANG TRÊN ANDROID 🔥 */
         .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--b2); margin-top: 15px; width: 100%; display: block; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; padding-bottom: 5px; }
         .data-table { width: 100%; border-collapse: collapse; background: white; font-size: 12px; min-width: 800px; } 
         .data-table th { background: var(--b5); color: white; padding: 12px; border: 1px solid rgba(255,255,255,0.1); white-space: nowrap; }
@@ -97,6 +99,9 @@
         .seg-area-cell { background-color: #f8fafc; font-weight: bold; text-align: left !important; color: var(--b6); border-right: 2px solid var(--b3) !important; position: sticky; left: 0; z-index: 2;}
         .seg-name-cell { text-align: left !important; font-weight: 600; color: #475569; position: sticky; left: 0; background: white; z-index: 1; }
 
+        /* =========================================================
+           🔥 GIAO DIỆN TƯƠNG THÍCH ĐIỆN THOẠI (MOBILE RESPONSIVE) 🔥
+           ========================================================= */
         @media screen and (max-width: 768px) {
             .menu-btn { display: flex; } 
             
@@ -166,11 +171,11 @@
 
         <div class="personnel-filters">
             <div class="list-container">
-                <div class="list-label">KAM (Auto Mapped)</div>
+                <div class="list-label">KAM / KAE</div>
                 <div class="scroll-list" id="kamList"></div>
             </div>
             <div class="list-container">
-                <div class="list-label">KAE / DSR</div>
+                <div class="list-label">DSR / KAE</div>
                 <div class="scroll-list" id="kaeList"></div>
             </div>
         </div>
@@ -243,7 +248,6 @@
 
 <script src="dbMarket.js"></script>
 <script src="dataM5.js"></script>
-
 <script>
 const dict = {
     vi: {
@@ -251,7 +255,7 @@ const dict = {
         allKam: "TẤT CẢ KAM", allKae: "TẤT CẢ KAE/DSR", kpiSales: "TỔNG SELL OUT", kpiSalesSub: "VNĐ (Chưa VAT)", 
         kpiTotal: "TỔNG KH TRÊN TUYẾN", kpiTotalSub: "khách hàng", kpiActive: "Khách Active", kpiActiveSub: "khách hàng", 
         kpiStrike: "Strike Rate", kpiStrikeSub: "Tỷ lệ KH Active / Tổng", cAreaTitle: "HIỆU SUẤT THEO KHU VỰC (AREA)", 
-        cSegmentTitle: "📊 PHÂN TÍCH HIỆU SUẤT THEO PHÂN KHÚC TUYẾN (ROUTE CLASS BY AREA)",
+        cSegmentTitle: "📊 PHÂN TÍCH HIỆU SUẤT THEO LOẠI TUYẾN (ROUTE CLASS BY AREA)",
         cKamTitle: "HIỆU SUẤT DOANH SỐ VÀ KHÁCH HÀNG BY KAM", cDayTitle: "HIỆU SUẤT DOANH SỐ VÀ KHÁCH HÀNG BY KAE",
         axisCust: "Đơn vị: Mã KH", axisVnd: "Đơn vị: VNĐ", legSales: "Doanh số", legTotal: "Tổng KH Kế Hoạch", legActive: "KH Active",
         tblColArea: "Chỉ số / Khu vực", tblColKam: "Chỉ số / Ngày (KAM)", tblColDay: "Chỉ số / Ngày (KAE)",
@@ -282,8 +286,8 @@ const dict = {
     }
 };
 
-// Map loại tuyến thành tên gọi thân thiện cho UI (bạn có thể bổ sung nếu có thêm mã tuyến mới)
-const segNames = { 'F4': 'Tuyến F4 (1 Lần/Tuần)', 'F2-1': 'Tuyến F2-1 (2 Lần/Tuần)', 'F2-2': 'Tuyến F2-2 (2 Lần/Tuần)', 'N': 'Chưa Rõ Tuyến' };
+// Đã cập nhật chú thích chính xác ở đây!
+const segNames = { 'F4': 'Tuyến F4', 'F2-1': 'Tuyến F2-1 (Ghé thăm W1 & W3)', 'F2-2': 'Tuyến F2-2 (Ghé thăm W2 & W4)', 'N': 'Chưa Rõ Tuyến' };
 const segColors = { 'F4': '#16a34a', 'F2-1': '#2563eb', 'F2-2': '#ea580c', 'N': '#64748b' };
 const monthOrder = { "jan":1, "feb":2, "mar":3, "apr":4, "may":5, "jun":6, "jul":7, "aug":8, "sep":9, "oct":10, "nov":11, "dec":12, "tháng 1":1, "tháng 2":2, "tháng 3":3, "tháng 4":4, "tháng 5":5 };
 
@@ -303,31 +307,30 @@ const formatWM = (w, m) => {
     return lang === 'vi' ? `${w} T${mNum}` : `${w} ${mName}`;
 };
 
-// Logic tìm thông tin Chợ từ Khóa Gộp
+// Hàm lấy thông tin chợ từ dbMarket (nếu bạn cần dùng để vẽ thêm chỉ số sau này)
 const getMarketInfo = (ar, m) => {
     if (typeof dbMarket === 'undefined') return null;
     let compKey = ar + "_" + m;
     return dbMarket[compKey] || null;
 }
 
-// Logic bóc tách tên nhân sự KAE -> KAM (Hoặc hiển thị nếu không có map)
-const cleanName = (name, isKamField = false) => {
+const cleanName = (name) => {
     let cleanStr = String(name || "").replace(/[✔️❌]/g, '').trim();
-    if (isKamField && typeof kamMap !== 'undefined' && kamMap[cleanStr]) return kamMap[cleanStr]; 
     return cleanStr;
 };
 
-// Giả lập lấy tên KAM từ tên KAE nếu bạn không lưu trực tiếp KAM trong db
+// Hàm trích xuất KAM từ db. (Tạm thời map KAE lên KAM vì dữ liệu chỉ có cột K)
 const deriveKam = (kaeName) => {
     let cleanKae = cleanName(kaeName);
-    return cleanKae; // Hiện tại ta coi KAE là KAM. Hãy thêm map KAE -> KAM của bạn vào đây nếu có.
+    if (typeof kamMap !== 'undefined' && kamMap[cleanKae]) return kamMap[cleanKae]; 
+    return cleanKae; 
 }
 
 const buildStatusMap = (subset, key) => {
     let map = {}; let isKamField = (key === 'kam');
     for (let i = subset.length - 1; i >= 0; i--) {
         let val = isKamField ? deriveKam(subset[i].k) : subset[i].k;
-        let clean = cleanName(val, isKamField);
+        let clean = cleanName(val);
         if (!map[clean]) {
             let raw = String(val).trim();
             let match = raw.match(/^[✔️❌]/);
@@ -348,7 +351,6 @@ const parseDay = (dayStr) => {
     return -1; 
 };
 
-// Hàm tính toán cốt lõi với cấu trúc Key ngắn gọn (cc, s, qt...)
 const aggregateDualData = (masterSubset, salesSubset) => {
     let masterSet = new Set();
     masterSubset.forEach(d => { if (d.cc) masterSet.add(d.cc); });
@@ -361,8 +363,8 @@ const aggregateDualData = (masterSubset, salesSubset) => {
         let currentSales = Number(d.s) || 0;
         sales += currentSales; 
         if (currentSales > 0) {
-            skuLines += 1; // Mỗi dòng (row) coi như 1 line hàng bán ra
-            invoiceCount++; 
+            skuLines += 1; // 1 dòng db tương ứng 1 loại SKU bán ra
+            invoiceCount++;
             if (d.cc) salesSet.add(d.cc);
         }
     });
@@ -372,7 +374,6 @@ const aggregateDualData = (masterSubset, salesSubset) => {
     return { s: sales, tc: totalC, ac: activeC, avgSku: avgSku };
 };
 
-// Render bảng phân tích phân khúc tuyến (F4, F2-1, F2-2)
 function renderSegmentTable(masterSubset, salesSubset) {
     let cusSegmentMap = {}; let uniqueMasterCus = new Set();
     masterSubset.forEach(d => {
@@ -503,7 +504,7 @@ function updateF(type, val) {
             if (type === 'kae') {
                 let f = dbMaster.find(d => cleanName(d.k) === val) || dbSales.find(d => cleanName(d.k) === val);
                 if (f && f.k) {
-                    let kName = cleanName(deriveKam(f.k), true);
+                    let kName = cleanName(deriveKam(f.k));
                     if (!filters.kam.includes(kName)) filters.kam.push(kName);
                 }
             }
@@ -526,8 +527,8 @@ function updateF(type, val) {
 
     if (filters.kam.length > 0) {
         let valid = new Set();
-        for(let i=0; i<dbMaster.length; i++) { if(filters.kam.includes(cleanName(deriveKam(dbMaster[i].k), true))) valid.add(cleanName(dbMaster[i].k)); }
-        for(let i=0; i<dbSales.length; i++) { if(filters.kam.includes(cleanName(deriveKam(dbSales[i].k), true))) valid.add(cleanName(dbSales[i].k)); }
+        for(let i=0; i<dbMaster.length; i++) { if(filters.kam.includes(cleanName(deriveKam(dbMaster[i].k)))) valid.add(cleanName(dbMaster[i].k)); }
+        for(let i=0; i<dbSales.length; i++) { if(filters.kam.includes(cleanName(deriveKam(dbSales[i].k)))) valid.add(cleanName(dbSales[i].k)); }
         filters.kae = filters.kae.filter(k => valid.has(k));
     } else if (type === 'kam') filters.kae = [];
 
@@ -574,8 +575,8 @@ function renderFilters() {
     const localKamStatus = buildStatusMap(baseMaster, 'kam');
     
     const kList = document.getElementById("kamList");
-    let masterKamsSet = new Set(baseMaster.map(d => cleanName(deriveKam(d.k), true)));
-    let salesKams = [...new Set(baseSales.map(d => cleanName(deriveKam(d.k), true)))];
+    let masterKamsSet = new Set(baseMaster.map(d => cleanName(deriveKam(d.k))));
+    let salesKams = [...new Set(baseSales.map(d => cleanName(deriveKam(d.k))))];
     let allKams = [...new Set([...masterKamsSet, ...salesKams])].filter(Boolean);
     
     let kamStatusMap = {};
@@ -603,7 +604,7 @@ function renderFilters() {
     kList.innerHTML = kamHtml;
     
     const kaeList = document.getElementById("kaeList");
-    const kamApplyF = d => baseApplyF(d) && (filters.kam.length === 0 || filters.kam.includes(cleanName(deriveKam(d.k), true)));
+    const kamApplyF = d => baseApplyF(d) && (filters.kam.length === 0 || filters.kam.includes(cleanName(deriveKam(d.k))));
     
     const mKaeData = dbMaster.filter(kamApplyF);
     const sKaeData = dbSales.filter(kamApplyF);
@@ -699,7 +700,7 @@ function render() {
     const baseMaster = dbMaster.filter(baseApplyF);
     const baseSales = dbSales.filter(baseApplyF);
 
-    const kamApplyF = d => baseApplyF(d) && (filters.kam.length === 0 || filters.kam.includes(cleanName(deriveKam(d.k), true)));
+    const kamApplyF = d => baseApplyF(d) && (filters.kam.length === 0 || filters.kam.includes(cleanName(deriveKam(d.k))));
     const kamMaster = dbMaster.filter(kamApplyF);
     const kamSales = dbSales.filter(kamApplyF);
 
@@ -708,18 +709,18 @@ function render() {
         let tempKams = new Set();
         filters.kae.forEach(k => {
              const fKam = dbMaster.find(d => cleanName(d.k) === k) || dbSales.find(d => cleanName(d.k) === k);
-             if (fKam && fKam.k) tempKams.add(cleanName(deriveKam(fKam.k), true));
+             if (fKam && fKam.k) tempKams.add(cleanName(deriveKam(fKam.k)));
         });
         inferredKams = [...tempKams];
     }
     
     const kaeApplyF = d => baseApplyF(d) && 
-                           (inferredKams.length === 0 || inferredKams.includes(cleanName(deriveKam(d.k), true))) &&
+                           (inferredKams.length === 0 || inferredKams.includes(cleanName(deriveKam(d.k)))) &&
                            (filters.kae.length === 0 || filters.kae.includes(cleanName(d.k)));
     const kaeMaster = dbMaster.filter(kaeApplyF);
     const kaeSales = dbSales.filter(kaeApplyF);
 
-    let ms = filters.month.length === 0 ? t('optAll') : filters.month.map(x => x.toUpperCase()).join(", ");
+    let ms = filters.month.length === 0 ? t('optAll') : filters.month.map(x => String(x).toUpperCase()).join(", ");
     let ws = filters.week.length === 0 ? t('optAll') : filters.week.join(", ");
     let hs = filters.hq.length === 0 ? t('optAll') : filters.hq.join(", ");
     let as = filters.area.length === 0 ? t('optAll') : filters.area.join(", ");
@@ -729,7 +730,7 @@ function render() {
 
     let kamsDisp = filters.kam.length === 0 ? t('optAll') : filters.kam.map(k => {
         let st = globalKamStatus[k] || k;
-        if(!st.startsWith('❌') && !baseMaster.some(d => cleanName(deriveKam(d.k), true) === k)) return "🚨 " + k;
+        if(!st.startsWith('❌') && !baseMaster.some(d => cleanName(deriveKam(d.k)) === k)) return "🚨 " + k;
         return st;
     }).join("; ");
 
@@ -824,10 +825,12 @@ function render() {
 
 function init() {
     dbMaster = []; dbSales = [];
-    // Load data from file JS 
     if (typeof dbMasterM5 !== 'undefined') dbMaster = dbMaster.concat(dbMasterM5);
     if (typeof dbSalesM5 !== 'undefined')  dbSales  = dbSales.concat(dbSalesM5);
-    // Bạn có thể duplicate thêm logic load M6, M7 tương tự bên dưới
+    if (typeof dbMasterM6 !== 'undefined') dbMaster = dbMaster.concat(dbMasterM6);
+    if (typeof dbSalesM6 !== 'undefined')  dbSales  = dbSales.concat(dbSalesM6);
+    if (typeof dbMasterM7 !== 'undefined') dbMaster = dbMaster.concat(dbMasterM7);
+    if (typeof dbSalesM7 !== 'undefined')  dbSales  = dbSales.concat(dbSalesM7);
 
     initResizer(); setLang('vi'); 
 }
