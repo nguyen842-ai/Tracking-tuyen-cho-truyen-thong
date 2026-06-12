@@ -12,10 +12,6 @@
             --primary: #059669; --primary-hover: #047857; --primary-light: #ecfdf5;
             --background: #f8fafc; --card-bg: #ffffff; --text-main: #0f172a;
             --text-muted: #475569; --border: #e2e8f0; --table-header: #f1f5f9;
-            
-            /* Màu biểu đồ SKU */
-            --c-red: #dc2626; --c-green-header: #059669; --c-green-dark: #022c22; 
-            --c-blue: #2563eb; --c-gray: #94a3b8;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -127,14 +123,14 @@
 
         /* Bố cục SKU: 80% Bảng - 20% Chart */
         .sku-container { display: flex; gap: 20px; align-items: stretch; width: 100%;}
-        .sku-table-wrap { width: 80%; flex-shrink: 0; }
-        .sku-chart-wrap { width: 20%; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; border-left: 1px solid var(--border); padding-left: 15px;}
+        .sku-table-wrap { flex-grow: 1; min-width: 0; display: flex; flex-direction: column;}
+        .sku-chart-wrap { width: 25%; min-width: 280px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; border-left: 1px solid var(--border); padding-left: 15px;}
         
-        /* Bảng phụ kiện SKU */
-        .sku-sub-table-wrap { overflow-y: auto; max-height: 250px; border: 1px solid var(--border); border-radius: 8px;}
-        .sku-sub-table { width: 100%; border-collapse: collapse; font-size: 10px; }
+        /* Bảng phụ kiện SKU: Chiếm trọn phần chiều cao còn lại */
+        .sku-sub-table-wrap { flex-grow: 1; height: 0; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;}
+        .sku-sub-table { width: 100%; border-collapse: collapse; font-size: 11px; }
         .sku-sub-table th, .sku-sub-table td { padding: 8px 10px; white-space: normal;}
-        .sku-sub-table th { font-size: 9px; position: sticky; top: 0; z-index: 1;}
+        .sku-sub-table th { font-size: 10px; position: sticky; top: 0; z-index: 1;}
         .sub-cat-row { background: var(--table-header); font-weight: 700;}
         .sub-item-row { color: var(--text-muted); }
 
@@ -149,7 +145,8 @@
             .scroll-list { max-height: 350px; }
             
             .sku-container { flex-direction: column; }
-            .sku-table-wrap, .sku-chart-wrap { width: 100%; border-left: none; padding-left: 0; }
+            .sku-chart-wrap { width: 100%; border-left: none; padding-left: 0; }
+            .sku-sub-table-wrap { min-height: 300px; height: auto; }
         }
         @media (max-width: 768px) { 
             .container { padding: 0 12px 12px 12px; } 
@@ -320,7 +317,7 @@
                 <div class="sku-container">
                     
                     <div class="sku-table-wrap">
-                        <div class="table-responsive">
+                        <div class="table-responsive" style="height: 100%;">
                             <table>
                                 <thead>
                                     <tr id="head-sku"></tr>
@@ -331,11 +328,11 @@
                     </div>
                     
                     <div class="sku-chart-wrap">
-                        <div style="position: relative; height: 180px; display: flex; align-items: center; justify-content: center;">
+                        <div style="position: relative; height: 200px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding-top: 10px;">
                             <canvas id="skuDoughnut"></canvas>
                             <div id="chartCenterText" style="position:absolute; text-align:center; pointer-events:none;">
-                                <div id="ccPct" style="font-size:20px; font-weight:800; color:var(--text-main);">100%</div>
-                                <div id="ccLbl" style="font-size:10px; color:var(--text-muted); font-weight: 600;">Tổng Doanh Số</div>
+                                <div id="ccPct" style="font-size:22px; font-weight:800; color:var(--text-main);">100%</div>
+                                <div id="ccLbl" style="font-size:11px; color:var(--text-muted); font-weight: 700; max-width: 100px; line-height: 1.2;">Tổng Doanh Số</div>
                             </div>
                         </div>
 
@@ -344,6 +341,7 @@
                                 <thead>
                                     <tr>
                                         <th data-i18n="colCat">Danh Mục / SKU</th>
+                                        <th class="text-right" data-i18n="colQty">Số lượng</th>
                                         <th class="text-right" data-i18n="colProp">Tỷ trọng</th>
                                     </tr>
                                 </thead>
@@ -363,6 +361,8 @@
     <script src="dbActive.js"></script> 
     <script src="dbMarket.js"></script>
     <script src="dataM5.js"></script>
+    <script src="dataM6.js"></script>
+
     <script>
         // =========================================================
         // 1. TỪ ĐIỂN ĐA NGÔN NGỮ & CONFIG CƠ BẢN
@@ -384,7 +384,7 @@
                 colDistrict: "Quận / Huyện", colMinD: "Số lượng chợ (Kế hoạch)", colCovM: "Chợ Covered thực tế", colSRM: "Strike Rate Chợ",
                 colCinD: "Estimate Outlet (Kế hoạch)", colCovO: "Active Outlet thực tế", colSRO: "Strike Rate Outlet", colTotalS: "Doanh Số Tổng",
                 colMarket: "Tên Chợ", colKae: "KAE Chăm Sóc", colCuscode: "Mã KH (Cuscode)", colCusname: "Tên Khách Hàng", colBelongM: "Thuộc Chợ", colSku: "Tên Sản Phẩm (SKU)",
-                colCat: "Danh Mục / SKU", colProp: "Tỷ trọng",
+                colCat: "Danh Mục / SKU", colQty: "SL (Thùng/Gói)", colProp: "Tỷ trọng",
                 rowPlanM: "Số lượng Chợ chăm sóc (Kế hoạch)", rowActM: "Số lượng Chợ có đơn hàng (Thực tế)", rowSRM: "Tỷ lệ bao phủ Chợ",
                 rowPlanO: "Số lượng Khách hàng trên tuyến", rowActO: "Số lượng Khách hàng lên đơn", rowSRO: "Tỷ lệ lên đơn (Strike Rate)", rowSales: "Doanh số",
                 days: ["T2", "T3", "T4", "T5", "T6", "T7"], noData: "Không có dữ liệu tương ứng bộ lọc"
@@ -405,7 +405,7 @@
                 colDistrict: "District", colMinD: "Planned Markets", colCovM: "Covered Markets", colSRM: "Market Strike Rate",
                 colCinD: "Estimate Outlets (Planned)", colCovO: "Active Outlets", colSRO: "Outlet Strike Rate", colTotalS: "Total Sales",
                 colMarket: "Market Name", colKae: "KAE in charge", colCuscode: "Cuscode", colCusname: "Customer Name", colBelongM: "Belongs to", colSku: "Product (SKU)",
-                colCat: "Category / SKU", colProp: "Prop.",
+                colCat: "Category / SKU", colQty: "Qty (Cartons)", colProp: "Prop.",
                 rowPlanM: "Number of Planned Markets", rowActM: "Number of Active Markets", rowSRM: "Market Coverage Rate",
                 rowPlanO: "Number of Planned Customers", rowActO: "Number of Active Customers", rowSRO: "Customer Strike Rate", rowSales: "Sales Revenue",
                 days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], noData: "No data matches filters"
@@ -473,15 +473,16 @@
         };
 
         // =========================================================
-        // LOGIC SKU KẾT HỢP BIỂU ĐỒ (DOUGHNUT) VÀ BẢNG PHỤ
+        // LOGIC TỰ ĐỘNG PHÂN LOẠI & GÁN MÀU CHO TỪNG SKU
         // =========================================================
         const getSkuCategory = (skuName) => {
             let s = String(skuName).toLowerCase();
-            if (s.includes("song lân")) return { id: "sl", name: "Song Lân", color: "var(--c-blue)" };
-            if (s.includes("cá hộp")) return { id: "ch", name: "Cá Hộp", color: "var(--c-red)" };
-            if (s.includes("miến tươi")) return { id: "mt", name: "Miến Tươi", color: "var(--c-green-header)" };
-            if (s.includes("miến đậu xanh")) return { id: "mdx", name: "Miến Đậu Xanh", color: "var(--c-green-dark)" };
-            return { id: "kh", name: "Khác", color: "var(--c-gray)" };
+            // Thứ tự ưu tiên quét từ khóa: Song Lân -> Cá hộp -> Miến tươi -> Miến đậu xanh -> Khác
+            if (s.includes("song lân")) return { id: "sl", name: "Song Lân", color: "#2563eb" }; // Xanh biển
+            if (s.includes("cá hộp")) return { id: "ch", name: "Cá Hộp", color: "#dc2626" }; // Đỏ
+            if (s.includes("miến tươi")) return { id: "mt", name: "Miến Tươi", color: "#059669" }; // Xanh trùng Header
+            if (s.includes("miến đậu xanh")) return { id: "mdx", name: "Miến Đậu Xanh", color: "#064e3b" }; // Xanh đậm 3 tone
+            return { id: "kh", name: "Sản phẩm Khác", color: "#94a3b8" }; // Xám xám
         };
 
         // =========================================================
@@ -612,6 +613,7 @@
         function renderDashboard() {
             if (dbMaster.length === 0 && dbSales.length === 0) return; 
 
+            // Lọc toàn bộ data
             const fullApplyF = d => (filters.month.length === 0 || filters.month.includes(d.mo)) && 
                                     (filters.week.length === 0 || filters.week.includes(getW(d))) && 
                                     (filters.hq.length === 0 || filters.hq.includes(d.hq)) && 
@@ -628,6 +630,7 @@
             document.getElementById("val-strike").innerText = fmt(sysKPI.ac);
             document.getElementById("val-strike-rate").innerText = formatPct(sysKPI.ac, sysKPI.tc);
 
+            // Bóc tách Months & Weeks hiện có để vẽ Header động
             targetMonths = [...new Set([...fMaster, ...fSales].map(d => d.mo))].filter(Boolean);
             targetMonths.sort((a,b) => (monthOrder[String(a).toLowerCase()]||99) - (monthOrder[String(b).toLowerCase()]||99));
             
@@ -789,82 +792,92 @@
             // ================== SKU (BẢNG LỚN + BIỂU ĐỒ) ==================
             document.getElementById('head-sku').innerHTML = `<th class="first-col-sticky" style="min-width: 250px;">${t('colSku')}</th>${targetMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}<th class="text-right" style="font-weight: bold; background-color: var(--table-header); z-index:1;">${t('colTotal')}</th>`;
             
-            let sTop = {};      // Chứa List All SKU
-            let catGroup = {};  // Chứa List Nhóm Lớn (Cá hộp, Miến tươi...)
+            let sTop = {};      
+            let catGroup = {};  
             let grandTotalSales = 0;
+            let grandTotalQty = 0;
 
+            // 1. Phân loại và Cộng dồn Số lượng (qt) & Doanh số (s)
             fSales.forEach(r => {
                 const sku = r.sku; if(!sku) return;
                 let saleVal = Number(r.s || 0);
+                let qtyVal = Number(r.qt || 0); // Lấy số lượng thùng/gói
                 
                 // Gom vào SKU nhỏ
                 if(!sTop[sku]) { 
-                    sTop[sku] = { name: sku, months: {}, total: 0 }; 
+                    sTop[sku] = { name: sku, months: {}, total: 0, qty: 0 }; 
                     targetMonths.forEach(m => sTop[sku].months[m] = 0); 
                 }
                 if (sTop[sku].months[r.mo] !== undefined) sTop[sku].months[r.mo] += saleVal;
                 sTop[sku].total += saleVal;
+                sTop[sku].qty += qtyVal;
 
-                // Gom vào Category Nhóm (Đồ thị)
+                // Gom vào Category Nhóm Lớn
                 let catObj = getSkuCategory(sku);
                 if(!catGroup[catObj.id]) {
-                    catGroup[catObj.id] = { id: catObj.id, name: catObj.name, color: catObj.color, total: 0, items: [] };
+                    catGroup[catObj.id] = { id: catObj.id, name: catObj.name, color: catObj.color, total: 0, qty: 0, items: [] };
                 }
                 catGroup[catObj.id].total += saleVal;
+                catGroup[catObj.id].qty += qtyVal;
+                
                 grandTotalSales += saleVal;
+                grandTotalQty += qtyVal;
             });
 
-            // Vẽ bảng Lớn bên trái
+            // 2. Vẽ Bảng Lớn (80%)
             const topSArr = Object.values(sTop).sort((a,b) => b.total - a.total);
             document.getElementById('tb-sku').innerHTML = topSArr.length === 0 ? `<tr><td colspan="15" class="empty-row">${t('noData')}</td></tr>` : topSArr.map(s => `
                 <tr><td class="first-col-sticky text-left">${s.name}</td>
                 ${targetMonths.map(m => `<td class="text-right">${s.months[m] > 0 ? fmt(s.months[m]) : '-'}</td>`).join('')}
                 <td class="text-right" style="font-weight:700; color:var(--primary); background-color:var(--background);">${fmt(s.total)}</td></tr>`).join('');
 
-            // Chuẩn bị Data cho Biểu Đồ (Doughnut) & Bảng Phụ
+            // 3. Chuẩn bị dữ liệu cho Chart và Bảng phụ
             let validCats = Object.values(catGroup).filter(c => c.total > 0).sort((a,b) => b.total - a.total);
             
-            // Nếu có chart cũ thì xóa
             if(charts['skuDoughnut']) charts['skuDoughnut'].destroy();
 
             if (validCats.length === 0 || grandTotalSales === 0) {
                 document.getElementById('chartCenterText').style.display = 'none';
-                document.getElementById('tb-sku-sub').innerHTML = `<tr><td colspan="2" class="empty-row">${t('noData')}</td></tr>`;
+                document.getElementById('tb-sku-sub').innerHTML = `<tr><td colspan="3" class="empty-row">${t('noData')}</td></tr>`;
             } else {
                 document.getElementById('chartCenterText').style.display = 'block';
                 
-                // Vẽ Biểu đồ
+                // 🔥 THUẬT TOÁN VISUAL PADDING & BẬC THANG (OFFSET) 🔥
+                // Đảm bảo lát cắt nhỏ nhất cũng hiển thị ít nhất 2.5% để dễ click, nhưng Data thực tế trên Tooltip không đổi.
+                const minVisual = grandTotalSales * 0.025; 
+                const visualData = validCats.map(c => Math.max(c.total, minVisual));
+                
+                // Cấp bậc Offset xô lệch cho từng lát cắt để tạo "chiều cao" (bán kính ngoài) khác nhau
+                const offsets = validCats.map((c, i) => i * 4); // Ví dụ: [0, 4, 8, 12, 16]
+
                 const ctx = document.getElementById('skuDoughnut').getContext('2d');
                 charts['skuDoughnut'] = new Chart(ctx, {
                     type: 'doughnut',
                     data: {
                         labels: validCats.map(c => c.name),
                         datasets: [{
-                            data: validCats.map(c => c.total),
-                            backgroundColor: validCats.map(c => {
-                                // Convert css var to hex if possible (ChartJS handles direct hex better, but modern browsers accept var via computed style)
-                                if(c.color.startsWith('var')) {
-                                    return getComputedStyle(document.documentElement).getPropertyValue(c.color.match(/var\((.*?)\)/)[1]).trim();
-                                }
-                                return c.color;
-                            }),
+                            data: visualData,
+                            backgroundColor: validCats.map(c => c.color),
                             borderWidth: 2,
-                            hoverOffset: 4
+                            borderColor: '#ffffff',
+                            offset: offsets, // Tạo cảm giác các vòng lệch nhau
+                            hoverOffset: 12  // Khi đưa chuột vào sẽ bung to hơn nữa
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        cutout: '70%',
+                        cutout: '65%',
+                        layout: { padding: 15 },
                         plugins: {
                             legend: { display: false },
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        let label = context.label || '';
-                                        let val = context.raw || 0;
-                                        let pct = ((val / grandTotalSales) * 100).toFixed(1) + '%';
-                                        return `${label}: ${fmt(val)} (${pct})`;
+                                        let idx = context.dataIndex;
+                                        let cat = validCats[idx];
+                                        let pct = ((cat.total / grandTotalSales) * 100).toFixed(1) + '%';
+                                        return `${cat.name}: ${fmt(cat.total)} (${pct})`;
                                     }
                                 }
                             }
@@ -874,10 +887,10 @@
                             const lblEl = document.getElementById('ccLbl');
                             if (elements && elements.length) {
                                 const idx = elements[0].index;
-                                const val = chart.data.datasets[0].data[idx];
-                                pctEl.innerText = ((val / grandTotalSales) * 100).toFixed(1) + '%';
-                                pctEl.style.color = chart.data.datasets[0].backgroundColor[idx];
-                                lblEl.innerText = chart.data.labels[idx];
+                                const cat = validCats[idx];
+                                pctEl.innerText = ((cat.total / grandTotalSales) * 100).toFixed(1) + '%';
+                                pctEl.style.color = cat.color;
+                                lblEl.innerText = cat.name;
                             } else {
                                 pctEl.innerText = '100%';
                                 pctEl.style.color = 'var(--text-main)';
@@ -887,30 +900,29 @@
                     }
                 });
 
-                // Nhồi SKU nhỏ vào Nhóm để vẽ Bảng phụ
+                // 4. Vẽ Bảng Phụ Chi Tiết (Tự động kéo dài)
                 topSArr.forEach(s => {
                     let cat = getSkuCategory(s.name);
-                    if (catGroup[cat.id]) {
-                        catGroup[cat.id].items.push(s);
-                    }
+                    if (catGroup[cat.id]) { catGroup[cat.id].items.push(s); }
                 });
 
-                // Vẽ Bảng phụ
                 let subHtml = "";
                 validCats.forEach(c => {
                     let catPct = ((c.total / grandTotalSales) * 100).toFixed(1) + '%';
-                    let cColor = c.color.startsWith('var') ? getComputedStyle(document.documentElement).getPropertyValue(c.color.match(/var\((.*?)\)/)[1]).trim() : c.color;
                     
+                    // Dòng Nhóm Lớn
                     subHtml += `<tr class="sub-cat-row">
-                        <td style="color:${cColor};">${c.name}</td>
-                        <td class="text-right" style="color:${cColor};">${catPct}</td>
+                        <td style="color:${c.color};">${c.name}</td>
+                        <td class="text-right" style="color:${c.color}; font-weight:800;">${fmt(c.qty)}</td>
+                        <td class="text-right" style="color:${c.color}; font-weight:800;">${catPct}</td>
                     </tr>`;
                     
-                    // Vẽ các SKU con trực thuộc nhóm này
-                    c.items.forEach(child => {
+                    // Các dòng SKU nhỏ bên trong
+                    c.items.sort((a,b) => b.total - a.total).forEach(child => {
                         let childPct = ((child.total / grandTotalSales) * 100).toFixed(1) + '%';
                         subHtml += `<tr class="sub-item-row">
                             <td style="padding-left:15px;">- ${child.name}</td>
+                            <td class="text-right">${fmt(child.qty)}</td>
                             <td class="text-right">${childPct}</td>
                         </tr>`;
                     });
