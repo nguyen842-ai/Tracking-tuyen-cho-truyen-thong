@@ -252,7 +252,7 @@ const dbMarket = {
 "1. HCMC_Chợ Tăng Nhơn Phú": { di: "Thủ Đức", ec: 9 },
 "1. HCMC_Chợ Việt Kiều": { di: "Hóc Môn", ec: 7 },
 "1. HCMC_Chợ Tân Thới Thượng": { di: "Hóc Môn", ec: 7 },
-"1. HCMC_Tạp Hóa": { di: "Chưa Rõ", ec: 1 },
+"1. HCMC_Tạp Hóa": { di: "Tạp Hóa", ec: 1 },
 "1. HCMC_Chợ 1A": { di: "Thủ Đức", ec: 5 },
 "1. HCMC_Chợ Liên Ấp 123": { di: "Bình Chánh", ec: 5 },
 "1. HCMC_Chợ Mỹ Nga": { di: "Bình Tân", ec: 7 },
