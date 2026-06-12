@@ -14,33 +14,66 @@
             --text-muted: #475569; --border: #e2e8f0; --table-header: #f1f5f9;
         }
 
-        /* 🔥 Xóa hiệu ứng chớp xám khi chạm ngón tay trên Android 🔥 */
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--background); color: var(--text-main); padding: 24px; line-height: 1.5; font-size: 13px; }
-        .container { width: 100%; max-width: 100%; padding: 0 15px; margin: 0 auto; transition: all 0.3s ease; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--background); color: var(--text-main); line-height: 1.5; font-size: 13px; }
+        .container { width: 100%; max-width: 1600px; padding: 0 24px 24px 24px; margin: 0 auto; transition: all 0.3s ease; }
 
-        header { background: linear-gradient(135deg, #064e3b 0%, #059669 100%); color: white; padding: 24px 32px; border-radius: 16px; margin-bottom: 24px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;}
-        header h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; text-transform: uppercase;}
-        header p { color: #d1fae5; font-size: 13px; margin: 0;}
+        /* =========================================================
+           2. THANH STICKY TOP BAR (TIÊU ĐỀ 40% & BỘ LỌC 60%)
+           ========================================================= */
+        .sticky-top-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(248, 250, 252, 0.95);
+            backdrop-filter: blur(8px);
+            padding: 24px 0 20px 0;
+            display: flex;
+            gap: 20px;
+            align-items: stretch;
+        }
+
+        .header-box {
+            width: 40%;
+            background: linear-gradient(135deg, #064e3b 0%, #059669 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+        .header-info h1 { font-size: 18px; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; line-height: 1.2;}
+        .header-info p { color: #d1fae5; font-size: 11px; margin: 0; opacity: 0.9;}
         
-        .lang-toggle { display: flex; gap: 4px; }
+        .lang-toggle { display: flex; gap: 4px; flex-shrink: 0;}
         .lang-toggle button { 
             border: 1px solid rgba(255,255,255,0.5); background: transparent; color: white; padding: 6px 12px; 
             font-size: 11px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: 0.2s;
         }
         .lang-toggle button.active { background: white; color: var(--primary); }
 
-        /* =========================================================
-           2. KHU VỰC BỘ LỌC ĐA DỮ LIỆU (MULTI-SELECT FILTERS)
-           ========================================================= */
-        .filter-card { background: var(--card-bg); padding: 20px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border: 1px solid var(--border); display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .filter-box {
+            width: 60%;
+            background: var(--card-bg);
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            align-items: center;
+        }
         .filter-group { display: flex; flex-direction: column; gap: 6px; }
         .filter-label { font-weight: 700; color: var(--text-muted); font-size: 11px; text-transform: uppercase; }
         
         .ms-box { position: relative; width: 100%; border: 1px solid var(--border); border-radius: 8px; background: white; cursor: pointer; transition: 0.2s; }
         .ms-box:hover { border-color: var(--primary); }
-        .ms-label { padding: 10px 14px; font-size: 13px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none; font-weight: 600;}
+        .ms-label { padding: 8px 12px; font-size: 12px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none; font-weight: 600;}
         .ms-label::after { content: '▼'; float: right; font-size: 10px; color: var(--text-muted); margin-top: 2px;}
         .ms-dropdown { position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid var(--border); border-radius: 8px; z-index: 999; max-height: 250px; overflow-y: auto; display: none; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); padding: 5px 0; margin-top: 4px; overscroll-behavior: contain;}
         .ms-opt { display: flex; align-items: center; padding: 10px 14px; font-size: 13px; cursor: pointer; color: var(--text-main); user-select: none; transition: 0.2s;}
@@ -48,30 +81,33 @@
         .ms-opt.selected { background: var(--primary); color: white; font-weight: bold; }
 
         /* =========================================================
-           3. KHU VỰC KPI CARDS
+           3. BỐ CỤC 30% - 70% VÀ KPI
            ========================================================= */
-        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 24px; }
-        .kpi-card { background: var(--card-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border); text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);}
-        .kpi-card .label { font-size: 11px; color: var(--text-muted); font-weight: 700; margin-bottom: 10px; text-transform: uppercase; }
-        .kpi-card .value { font-size: 22px; font-weight: 800; color: var(--primary); }
-        .kpi-card .sub { font-size: 11px; color: #64748b; margin-top: 6px; font-weight: 600;}
+        .dashboard-row { display: grid; gap: 24px; margin-bottom: 24px; }
+        .row-30-70 { grid-template-columns: 3fr 7fr; align-items: start;} 
+        
+        .col-left { display: flex; flex-direction: column; gap: 20px; }
+        .col-right { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
 
-        /* =========================================================
-           4. BỐ CỤC 30% - 70% VÀ CÁC BẢNG (GRID LAYOUT)
-           ========================================================= */
-        .dashboard-row { display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px; }
-        .row-30-70 { grid-template-columns: 3fr 7fr; } /* 👈 Tỷ lệ 30% - 70% cho KAE list và Daily */
+        .kpi-grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .kpi-card { background: var(--card-bg); border-radius: 12px; padding: 16px; border: 1px solid var(--border); text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);}
+        .kpi-card .label { font-size: 10px; color: var(--text-muted); font-weight: 700; margin-bottom: 8px; text-transform: uppercase; }
+        .kpi-card .value { font-size: 18px; font-weight: 800; color: var(--primary); }
+        .kpi-card .sub { font-size: 10px; color: #64748b; margin-top: 6px; font-weight: 600;}
 
         .section-card { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden; display: flex; flex-direction: column;}
-        .section-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; border-left: 4px solid var(--primary); padding-left: 12px; text-transform: uppercase;}
+        .section-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 16px; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; border-left: 4px solid var(--primary); padding-left: 12px; text-transform: uppercase;}
 
-        .kae-panel { padding: 0; }
-        .kae-panel h3 { margin: 20px 20px 10px 20px; }
-        .scroll-list { overflow-y: auto; flex-grow: 1; background: #fff; border-top: 1px solid var(--border); max-height: 450px; overscroll-behavior-y: contain;}
-        .list-item { padding: 14px 20px; border-bottom: 1px solid var(--border); cursor: pointer; font-size: 13px; transition: 0.2s; user-select: none; color: var(--text-main);}
+        .kae-panel { padding: 0; flex-grow: 1;}
+        .kae-panel h3 { margin: 16px 16px 10px 16px; }
+        .scroll-list { overflow-y: auto; background: #fff; border-top: 1px solid var(--border); max-height: 500px; overscroll-behavior-y: contain;}
+        .list-item { padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; font-size: 12px; transition: 0.2s; user-select: none; color: var(--text-main);}
         .list-item:hover { background: var(--primary-light); }
         .list-item.selected { background: var(--primary); color: white; font-weight: 600; }
 
+        /* =========================================================
+           4. TABLE STYLES
+           ========================================================= */
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid var(--border); padding-bottom: 4px;}
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
         th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; }
@@ -89,101 +125,108 @@
            🔥 MOBILE RESPONSIVE
            ========================================================= */
         @media (max-width: 1024px) { 
-            .row-30-70 { grid-template-columns: 1fr; } /* Thả rơi thành 1 cột trên màn hình nhỏ */
-            .filter-card { grid-template-columns: 1fr 1fr; }
-            .kpi-grid { grid-template-columns: 1fr 1fr; }
+            .row-30-70 { grid-template-columns: 1fr; } 
+            .sticky-top-bar { flex-direction: column; padding-top: 15px; margin-bottom: 10px;}
+            .header-box { width: 100%; flex-direction: row;}
+            .filter-box { width: 100%; grid-template-columns: 1fr 1fr; }
+            .scroll-list { max-height: 350px; }
         }
         @media (max-width: 768px) { 
-            body { padding: 12px; } 
-            header { padding: 20px; flex-direction: column; align-items: flex-start; gap: 10px;} 
-            header h1 { font-size: 20px; } 
+            .container { padding: 0 12px 12px 12px; } 
+            .header-box { flex-direction: column; align-items: flex-start; gap: 12px;} 
             .first-col-sticky { position: relative; left: auto; box-shadow: none; z-index: 1;}
-            .scroll-list { max-height: 350px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <div>
-                <h1 data-i18n="sysTitle">Tracking Sell Out Tuyến Chợ Truyền Thống</h1>
-                <p data-i18n="sysSub">Hệ thống báo cáo hiệu suất bán hàng, đối chiếu danh mục tuyến MCP độc lập</p>
-            </div>
-            <div class="lang-toggle">
-                <button id="btn-vi" onclick="setLang('vi')" class="active">VI</button>
-                <button id="btn-en" onclick="setLang('en')">EN</button>
-            </div>
-        </header>
-
-        <div class="filter-card">
-            <div class="filter-group">
-                <label data-i18n="fMonth">Tháng</label>
-                <div class="ms-box" onclick="toggleMS('month')">
-                    <div class="ms-label" id="lbl-month">Tất cả</div>
-                    <div class="ms-dropdown" id="drop-month" onclick="event.stopPropagation()"></div>
+        
+        <div class="sticky-top-bar">
+            <div class="header-box">
+                <div class="header-info">
+                    <h1 data-i18n="sysTitle">Tracking Sell Out Tuyến Chợ</h1>
+                    <p data-i18n="sysSub">Hệ thống báo cáo hiệu suất bán hàng, đối chiếu danh mục tuyến MCP độc lập</p>
+                </div>
+                <div class="lang-toggle">
+                    <button id="btn-vi" onclick="setLang('vi')" class="active">VI</button>
+                    <button id="btn-en" onclick="setLang('en')">EN</button>
                 </div>
             </div>
-            <div class="filter-group">
-                <label data-i18n="fWeek">Tuần</label>
-                <div class="ms-box" onclick="toggleMS('week')">
-                    <div class="ms-label" id="lbl-week">Tất cả</div>
-                    <div class="ms-dropdown" id="drop-week" onclick="event.stopPropagation()"></div>
-                </div>
-            </div>
-            <div class="filter-group">
-                <label data-i18n="fRegion">Miền</label>
-                <div class="ms-box" onclick="toggleMS('hq')">
-                    <div class="ms-label" id="lbl-hq">Tất cả</div>
-                    <div class="ms-dropdown" id="drop-hq" onclick="event.stopPropagation()"></div>
-                </div>
-            </div>
-            <div class="filter-group">
-                <label data-i18n="fArea">Khu vực</label>
-                <div class="ms-box" onclick="toggleMS('area')">
-                    <div class="ms-label" id="lbl-area">Tất cả</div>
-                    <div class="ms-dropdown" id="drop-area" onclick="event.stopPropagation()"></div>
-                </div>
-            </div>
-        </div>
 
-        <div class="kpi-grid">
-            <div class="kpi-card"><div class="label" data-i18n="kpiSales">DOANH SỐ</div><div class="value" id="val-sales">0</div><div class="sub" data-i18n="kpiSalesSub">VNĐ (Chưa VAT)</div></div>
-            <div class="kpi-card"><div class="label" data-i18n="kpiTotal">TỔNG KH TRÊN TUYẾN</div><div class="value" id="val-cust">0</div><div class="sub" data-i18n="kpiTotalSub">khách hàng</div></div>
-            <div class="kpi-card"><div class="label" data-i18n="kpiActive">KH ACTIVE</div><div class="value" id="val-strike">0</div><div class="sub" data-i18n="kpiActiveSub">khách hàng</div></div>
-            <div class="kpi-card"><div class="label" data-i18n="kpiStrike">STRIKE RATE</div><div class="value" id="val-strike-rate">0%</div><div class="sub" data-i18n="kpiStrikeSub">Tỷ lệ KH Active / Tổng</div></div>
-        </div>
-
-        <div class="dashboard-row row-30-70">
-            <div class="section-card kae-panel">
-                <h3 data-i18n="lblKae">TẤT CẢ KAE / DSR</h3>
-                <div class="scroll-list" id="kaeList"></div>
-            </div>
-
-            <div class="section-card">
-                <h3 data-i18n="titleDaily">Daily Tracking <span class="badge" data-i18n="badgeDaily">Tuyến: MCP Gốc | Tổng: Lọc trùng toàn tuần</span></h3>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr id="head-daily"></tr>
-                        </thead>
-                        <tbody id="tb-daily"></tbody>
-                    </table>
+            <div class="filter-box">
+                <div class="filter-group">
+                    <label data-i18n="fMonth">Tháng</label>
+                    <div class="ms-box" onclick="toggleMS('month')">
+                        <div class="ms-label" id="lbl-month">Tất cả</div>
+                        <div class="ms-dropdown" id="drop-month" onclick="event.stopPropagation()"></div>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label data-i18n="fWeek">Tuần</label>
+                    <div class="ms-box" onclick="toggleMS('week')">
+                        <div class="ms-label" id="lbl-week">Tất cả</div>
+                        <div class="ms-dropdown" id="drop-week" onclick="event.stopPropagation()"></div>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label data-i18n="fRegion">Miền</label>
+                    <div class="ms-box" onclick="toggleMS('hq')">
+                        <div class="ms-label" id="lbl-hq">Tất cả</div>
+                        <div class="ms-dropdown" id="drop-hq" onclick="event.stopPropagation()"></div>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label data-i18n="fArea">Khu vực</label>
+                    <div class="ms-box" onclick="toggleMS('area')">
+                        <div class="ms-label" id="lbl-area">Tất cả</div>
+                        <div class="ms-dropdown" id="drop-area" onclick="event.stopPropagation()"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="dashboard-row">
-            <div class="section-card">
-                <h3 data-i18n="titleWeekly">Weekly Tracking <span class="badge" style="background-color: #fef08a; color: #854d0e;" data-i18n="badgeWeekly">Tổng Tháng: Lọc trùng khớp 100% với Monthly</span></h3>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr id="head-weekly"></tr>
-                        </thead>
-                        <tbody id="tb-weekly"></tbody>
-                    </table>
+        <div class="dashboard-row row-30-70">
+            
+            <div class="col-left">
+                <div class="kpi-grid-2x2">
+                    <div class="kpi-card"><div class="label" data-i18n="kpiSales">DOANH SỐ</div><div class="value" id="val-sales">0</div><div class="sub" data-i18n="kpiSalesSub">VNĐ (Chưa VAT)</div></div>
+                    <div class="kpi-card"><div class="label" data-i18n="kpiTotal">TỔNG KH TRÊN TUYẾN</div><div class="value" id="val-cust">0</div><div class="sub" data-i18n="kpiTotalSub">khách hàng</div></div>
+                    <div class="kpi-card"><div class="label" data-i18n="kpiActive">KH ACTIVE</div><div class="value" id="val-strike">0</div><div class="sub" data-i18n="kpiActiveSub">khách hàng</div></div>
+                    <div class="kpi-card"><div class="label" data-i18n="kpiStrike">STRIKE RATE</div><div class="value" id="val-strike-rate">0%</div><div class="sub" data-i18n="kpiStrikeSub">Tỷ lệ KH Active / Tổng</div></div>
+                </div>
+
+                <div class="section-card kae-panel">
+                    <h3 data-i18n="lblKae">TẤT CẢ KAE / DSR</h3>
+                    <div class="scroll-list" id="kaeList"></div>
                 </div>
             </div>
+
+            <div class="col-right">
+                <div class="section-card">
+                    <h3 data-i18n="titleDaily">Daily Tracking <span class="badge" data-i18n="badgeDaily">Tuyến: MCP Gốc | Tổng: Lọc trùng toàn tuần</span></h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr id="head-daily"></tr>
+                            </thead>
+                            <tbody id="tb-daily"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <h3 data-i18n="titleWeekly">Weekly Tracking <span class="badge" style="background-color: #fef08a; color: #854d0e;" data-i18n="badgeWeekly">Tổng Tháng: Lọc trùng khớp 100% với Monthly</span></h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr id="head-weekly"></tr>
+                            </thead>
+                            <tbody id="tb-weekly"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div class="dashboard-row">
@@ -275,7 +318,7 @@
         // =========================================================
         const dict = {
             vi: {
-                sysTitle: "Tracking Sell Out Tuyến Chợ", sysSub: "Hệ thống báo cáo hiệu suất bán hàng, đối chiếu danh mục tuyến MCP độc lập",
+                sysTitle: "Tracking Sell Out Tuyến Chợ", sysSub: "Hệ thống báo cáo hiệu suất bán hàng, đối chiếu MCP độc lập",
                 fMonth: "Tháng", fWeek: "Tuần", fRegion: "Miền", fArea: "Khu vực", optAll: "Tất cả",
                 lblKae: "TẤT CẢ KAE / DSR",
                 kpiSales: "TỔNG DOANH SỐ", kpiSalesSub: "VNĐ (Chưa VAT)", 
@@ -295,7 +338,7 @@
                 days: ["T2", "T3", "T4", "T5", "T6", "T7"], noData: "Không có dữ liệu tương ứng bộ lọc"
             },
             en: {
-                sysTitle: "Traditional Market Sell Out Tracking", sysSub: "Sales performance reporting system, independent MCP routing sync",
+                sysTitle: "Traditional Market Sell Out Tracking", sysSub: "Sales performance reporting system, independent MCP sync",
                 fMonth: "Month", fWeek: "Week", fRegion: "Region", fArea: "Area", optAll: "All",
                 lblKae: "ALL KAE / DSR",
                 kpiSales: "TOTAL SELL OUT", kpiSalesSub: "VND (Excl. VAT)", 
@@ -319,7 +362,7 @@
         const monthOrder = { "jan":1, "feb":2, "mar":3, "apr":4, "may":5, "jun":6, "jul":7, "aug":8, "sep":9, "oct":10, "nov":11, "dec":12, "tháng 1":1, "tháng 2":2, "tháng 3":3, "tháng 4":4, "tháng 5":5, "tháng 6":6 };
         
         let lang = 'vi';
-        let filters = { month: [], week: [], hq: [], area: [], kae: [] }; // Bỏ KAM
+        let filters = { month: [], week: [], hq: [], area: [], kae: [] }; 
         let dbMaster = []; let dbSales = []; let targetMonths = []; let targetWeeks = [];
         let districtUniverse = {}; 
 
@@ -499,7 +542,7 @@
         }
 
         // =========================================================
-        // 3. LOGIC XỬ LÝ TABLE & ENGINE PHÂN TÍCH (MARKET TRACKING)
+        // 3. LOGIC XỬ LÝ TABLE & ENGINE PHÂN TÍCH
         // =========================================================
         function renderDashboard() {
             if (dbMaster.length === 0 && dbSales.length === 0) return; 
