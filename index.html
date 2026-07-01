@@ -294,10 +294,10 @@
                                 <thead>
                                     <tr>
                                         <th class="first-col-sticky" data-i18n="colDistrict">Quận / Huyện</th>
-                                        <th class="text-right" data-i18n="colMinD">Số lượng chợ trên địa bàn</th>
+                                        <th class="text-right" data-i18n="colMinD">Số lượng chợ trên tuyến</th>
                                         <th class="text-right" data-i18n="colCovM">Chợ Covered thực tế</th>
                                         <th class="text-right" style="color:var(--primary);" data-i18n="colSRM">Strike Rate Chợ</th>
-                                        <th class="text-right" data-i18n="colCinD">Estimate Outlet trên địa bàn</th>
+                                        <th class="text-right" data-i18n="colCinD">Estimate Outlet trên tuyến</th>
                                         <th class="text-right" data-i18n="colCovO">Active Outlet thực tế</th>
                                         <th class="text-right" style="color:var(--primary);" data-i18n="colSRO">Strike Rate Outlet</th>
                                         <th class="text-right" data-i18n="colTotalS">Doanh Số Tổng</th>
@@ -399,6 +399,7 @@
         // Biến toàn cục để lưu trữ dữ liệu xuất Excel
         let currentDetailData = [];
         let currentGlobalMonths = [];
+        let currentLatestMonthName = "";
 
         // =========================================================
         // 1. TỪ ĐIỂN ĐA NGÔN NGỮ & CONFIG CƠ BẢN
@@ -551,7 +552,6 @@
         // =========================================================
         function switchTab(tabId) {
             document.querySelectorAll('.tab-btn').forEach(btn => {
-                // Không xóa active class của nút Tải Excel
                 if(!btn.classList.contains('btn-export')) btn.classList.remove('active');
             });
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -681,17 +681,21 @@
                 return;
             }
 
-            // Ký tự BOM báo hiệu file là chuẩn UTF-8
             let csvContent = "\uFEFF"; 
             
-            // Xây dựng Header
             let headers = [t('colDistrict'), t('colMarket')];
             currentGlobalMonths.forEach(m => headers.push(formatM(m)));
-            headers.push(t('colTotalS'), t('colActOutlet'), t('colSkuInv'), t('colValInv'));
+            
+            // Cập nhật Header khớp với logic hiển thị tháng mới nhất
+            headers.push(
+                t('colTotalS'), 
+                `${t('colActOutlet')} (${currentLatestMonthName})`, 
+                `${t('colSkuInv')} (${currentLatestMonthName})`, 
+                `${t('colValInv')} (${currentLatestMonthName})`
+            );
             
             csvContent += headers.map(h => `"${h}"`).join(",") + "\n";
 
-            // Xây dựng Data Rows
             currentDetailData.forEach(d => {
                 let row = [
                     `"${d.district}"`,
@@ -701,19 +705,18 @@
                     row.push(`"${d.salesByMonth[m] || 0}"`);
                 });
                 row.push(`"${d.totalSales}"`);
-                row.push(`"${d.uniqueCCs.size}"`);
+                row.push(`"${d.activeCusLatest}"`);
                 row.push(`"${d.skuPerInv.toFixed(2)}"`);
                 row.push(`"${Math.round(d.valPerInv)}"`);
                 
                 csvContent += row.join(",") + "\n";
             });
 
-            // Tải file xuống
             let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             let link = document.createElement("a");
             let url = URL.createObjectURL(blob);
             link.setAttribute("href", url);
-            link.setAttribute("download", "Chi_Tiet_Bao_Phu_Cho.csv");
+            link.setAttribute("download", `Chi_Tiet_Bao_Phu_Cho_${currentLatestMonthName}.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
@@ -726,9 +729,6 @@
         function renderDashboard() {
             if (dbMaster.length === 0 && dbSales.length === 0) return; 
 
-            // ---------------------------------------------------------
-            // BỘ LỌC CHUNG CHO TABS TỔNG HỢP (CŨ)
-            // ---------------------------------------------------------
             const baseApplyF = d => (filters.month.length === 0 || filters.month.includes(d.mo)) && 
                                     (filters.week.length === 0 || filters.week.includes(getW(d))) && 
                                     (filters.hq.length === 0 || filters.hq.includes(d.hq)) && 
@@ -1079,22 +1079,21 @@
             // BỘ LỌC ĐỘC LẬP CHO TAB 2: CHI TIẾT BAO PHỦ CHỢ
             // ---------------------------------------------------------
             
-            // Bước 1: Xác định tháng Master mới nhất (để cố định danh sách tài sản)
-            let allMasterMonths = [...new Set(dbMaster.map(d => d.mo))].filter(Boolean);
-            allMasterMonths.sort((a,b) => (monthOrder[String(a).toLowerCase()]||99) - (monthOrder[String(b).toLowerCase()]||99));
-            let latestMasterMonth = allMasterMonths[allMasterMonths.length - 1];
-
-            // Tìm toàn bộ tháng có trong dữ liệu làm cột hiển thị lịch sử doanh số (không bị giới hạn bởi bộ lọc người dùng)
+            // Tìm tất cả các tháng Global (cả Plan và Sales)
             let allGlobalMonths = [...new Set([...dbMaster, ...dbSales].map(d => d.mo))].filter(Boolean);
             allGlobalMonths.sort((a,b) => (monthOrder[String(a).toLowerCase()]||99) - (monthOrder[String(b).toLowerCase()]||99));
+            
+            // Tháng có dữ liệu mới nhất (được dùng để chốt danh sách & tính hiệu suất tháng cuối)
+            let targetLatestMonth = allGlobalMonths[allGlobalMonths.length - 1];
+            currentLatestMonthName = formatM(targetLatestMonth);
 
-            // Bước 2: Chỉ lấy kế hoạch (Master Data) của tháng mới nhất đó để chốt danh sách
+            // Bước 2: Lấy kế hoạch (Master Data) của tháng mới nhất để chốt danh sách
             const tab2Master = dbMaster.filter(d => {
                 let hqOk = filters.hq.length === 0 || filters.hq.includes(d.hq);
                 let arOk = filters.area.length === 0 || filters.area.includes(d.ar);
                 let kaeOk = filters.kae.length === 0 || filters.kae.includes(cleanName(d.k));
                 
-                return d.mo === latestMasterMonth && hqOk && arOk && kaeOk;
+                return d.mo === targetLatestMonth && hqOk && arOk && kaeOk;
             });
 
             let marketDetails = {};
@@ -1110,8 +1109,11 @@
                         market: mk,
                         salesByMonth: {},
                         totalSales: 0,
-                        uniqueCCs: new Set(),
-                        skusPerCC: {}
+                        
+                        // Cấu trúc mới: CHỈ lưu trữ cho tháng mới nhất
+                        latestSales: 0,
+                        uniqueCCsLatest: new Set(),
+                        skusPerCCLatest: {}
                     };
                     allGlobalMonths.forEach(m => marketDetails[mk].salesByMonth[m] = 0);
                 }
@@ -1133,10 +1135,14 @@
                 }
                 marketDetails[mk].totalSales += val;
                 
-                if (r.cc) {
-                    marketDetails[mk].uniqueCCs.add(r.cc);
-                    if (!marketDetails[mk].skusPerCC[r.cc]) marketDetails[mk].skusPerCC[r.cc] = new Set();
-                    if (r.sku) marketDetails[mk].skusPerCC[r.cc].add(r.sku);
+                // CHỈ TÍNH SKU/INV & VAL/INV cho THÁNG MỚI NHẤT
+                if (r.mo === targetLatestMonth) {
+                    marketDetails[mk].latestSales += val;
+                    if (r.cc) {
+                        marketDetails[mk].uniqueCCsLatest.add(r.cc);
+                        if (!marketDetails[mk].skusPerCCLatest[r.cc]) marketDetails[mk].skusPerCCLatest[r.cc] = new Set();
+                        if (r.sku) marketDetails[mk].skusPerCCLatest[r.cc].add(r.sku);
+                    }
                 }
             });
 
@@ -1146,21 +1152,22 @@
                 <th>${t('colMarket')}</th>
                 ${allGlobalMonths.map(m => `<th class="text-right">${formatM(m)}</th>`).join('')}
                 <th class="text-right" style="font-weight: bold; background-color: var(--table-header);">${t('colTotalS')}</th>
-                <th class="text-right" style="color:var(--primary);">${t('colActOutlet')}</th>
-                <th class="text-right" style="color:var(--primary);">${t('colSkuInv')}</th>
-                <th class="text-right" style="color:var(--primary);">${t('colValInv')}</th>
+                <th class="text-right" style="color:var(--primary);">${t('colActOutlet')} (${currentLatestMonthName})</th>
+                <th class="text-right" style="color:var(--primary);">${t('colSkuInv')} (${currentLatestMonthName})</th>
+                <th class="text-right" style="color:var(--primary);">${t('colValInv')} (${currentLatestMonthName})</th>
             `;
 
             let detailArr = Object.values(marketDetails).map(d => {
-                let activeCusCount = d.uniqueCCs.size;
-                let totalUniqueSkus = 0;
+                let activeCusCountLatest = d.uniqueCCsLatest.size;
+                let totalUniqueSkusLatest = 0;
                 
-                for (let cc in d.skusPerCC) {
-                    totalUniqueSkus += d.skusPerCC[cc].size;
+                for (let cc in d.skusPerCCLatest) {
+                    totalUniqueSkusLatest += d.skusPerCCLatest[cc].size;
                 }
                 
-                d.skuPerInv = activeCusCount > 0 ? (totalUniqueSkus / activeCusCount) : 0;
-                d.valPerInv = activeCusCount > 0 ? (d.totalSales / activeCusCount) : 0;
+                d.skuPerInv = activeCusCountLatest > 0 ? (totalUniqueSkusLatest / activeCusCountLatest) : 0;
+                d.valPerInv = activeCusCountLatest > 0 ? (d.latestSales / activeCusCountLatest) : 0;
+                d.activeCusLatest = activeCusCountLatest;
                 return d;
             });
 
@@ -1182,7 +1189,7 @@
                         <td>${d.market}</td>
                         ${allGlobalMonths.map(m => `<td class="text-right">${d.salesByMonth[m] > 0 ? fmt(d.salesByMonth[m]) : '-'}</td>`).join('')}
                         <td class="text-right" style="font-weight:700; background-color:var(--background);">${fmt(d.totalSales)}</td>
-                        <td class="text-right" style="font-weight:600; color:var(--text-main);">${d.uniqueCCs.size}</td>
+                        <td class="text-right" style="font-weight:600; color:var(--text-main);">${d.activeCusLatest}</td>
                         <td class="text-right" style="font-weight:600; color:var(--text-main);">${fmtQty(d.skuPerInv)}</td>
                         <td class="text-right" style="font-weight:600; color:var(--text-main);">${fmt(d.valPerInv)}</td>
                     </tr>
