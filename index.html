@@ -1261,7 +1261,7 @@
         }
 
         // =========================================================
-        // 4. HÀM GOM DỮ LIỆU ĐÃ ĐƯỢC CẬP NHẬT ĐỂ QUÉT TỪ dataM1 ĐẾN dataM12
+        // 4. HÀM GOM DỮ LIỆU ĐÃ ĐƯỢC NÂNG CẤP ĐỂ TÓM BIẾN CONST/LET
         // =========================================================
         function init() {
             dbMaster = []; 
@@ -1269,10 +1269,19 @@
             
             // Quét tự động các file JS đã tải từ Supabase (từ 1 đến 12)
             for (let i = 1; i <= 12; i++) {
-                if (typeof window['dbMasterM' + i] !== 'undefined') dbMaster = dbMaster.concat(window['dbMasterM' + i]);
-                if (typeof window['dbSalesM' + i] !== 'undefined')  dbSales  = dbSales.concat(window['dbSalesM' + i]);
+                try {
+                    // Dùng eval() để bắt được biến dù khai báo là var, let hay const
+                    let mData = eval(`typeof dbMasterM${i} !== 'undefined' ? dbMasterM${i} : null`);
+                    if (mData) dbMaster = dbMaster.concat(mData);
+                    
+                    let sData = eval(`typeof dbSalesM${i} !== 'undefined' ? dbSalesM${i} : null`);
+                    if (sData) dbSales = dbSales.concat(sData);
+                } catch (err) {
+                    // Bỏ qua nếu có lỗi cục bộ
+                }
             }
 
+            // Khởi tạo danh sách địa bàn từ file dbMarket
             if (typeof dbMarket !== 'undefined') {
                 Object.keys(dbMarket).forEach(key => {
                     let mInfo = dbMarket[key];
