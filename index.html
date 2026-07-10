@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Tracking Sell Out Tuyến Chợ Truyền Thống</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         /* =========================================================
            1. CẤU HÌNH MÀU SẮC & GIAO DIỆN CHUNG
@@ -153,6 +156,9 @@
         .sub-cat-row { background: var(--table-header); font-weight: 700;}
         .sub-item-row { color: var(--text-muted); }
 
+        /* MÀN HÌNH CHỜ BẢO MẬT (Thêm mới) */
+        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.5s ease; }
+
         /* =========================================================
            🔥 MOBILE RESPONSIVE
            ========================================================= */
@@ -178,7 +184,19 @@
     </style>
 </head>
 <body>
-    <div class="container">
+
+    <div id="loading-screen">
+        <div style="text-align: center; width: 300px;">
+            <h2 style="margin-bottom: 5px; font-size: 18px; color: var(--primary);">HỆ THỐNG ĐANG KHỞI TẠO</h2>
+            <div id="loading-status" style="font-size: 14px; color: #666; margin-top: 10px;">Đang kiểm tra bảo mật...</div>
+            <div style="width: 100%; background-color: #e0e0e0; border-radius: 10px; overflow: hidden; height: 8px; margin-top: 15px;">
+                <div style="width: 100%; height: 100%; background-color: var(--primary); animation: loadPulse 2s infinite;"></div>
+            </div>
+        </div>
+    </div>
+    <style>@keyframes loadPulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }</style>
+
+    <div class="container" style="display: none;" id="main-container">
         
         <div class="top-bar">
             <div class="header-box">
@@ -389,29 +407,85 @@
 
     <script src="dbActive.js"></script> 
     <script src="dbMarket.js"></script>
-    <script src="dataM5.js"></script>
-    <script src="dataM6.js"></script>
 
     <script>
+        // CẤU HÌNH BẢO MẬT SUPABASE
+        const SUPABASE_URL = "https://mrqldgycwovpbmzdeuyz.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_itZfZBVw7bxE184tGh7x8A_0_r-QB5p";
+        const supabaseApp = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // HÀM TẢI FILE JS TỪ BUCKET SUPABASE THAY VÌ GỌI LOCAL
+        async function loadScriptFromSupabase(fileName) {
+            try {
+                const { data, error } = await supabaseApp.storage.from('chotruyenthong').download(fileName);
+                if (error) throw error;
+                const text = await data.text();
+                const script = document.createElement('script');
+                script.textContent = text;
+                document.head.appendChild(script);
+                return true;
+            } catch (err) {
+                console.warn(`Đã bỏ qua file (không có trên hệ thống hoặc bị chặn): ${fileName}`);
+                return false;
+            }
+        }
+
+        async function loadDataScripts() {
+            document.getElementById('loading-status').innerText = "Đang tải dữ liệu bảo mật từ Supabase...";
+            
+            // Loop từ 1 đến 12 để tải dữ liệu các tháng
+            const promises = Array.from({ length: 12 }, (_, i) => {
+                return loadScriptFromSupabase(`dataM${i + 1}.js`);
+            });
+            
+            return Promise.all(promises);
+        }
+
+        // BẢO VỆ VÒNG NGOÀI (AUTH GUARD) VÀ KHỞI TẠO DỮ LIỆU
+        window.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabaseApp.auth.getSession();
+            
+            if (!session) {
+                document.getElementById('loading-screen').style.display = 'none';
+                alert("Truy cập bị từ chối! Vui lòng đăng nhập hệ thống.");
+                
+                // 👇 THAY BẰNG LINK TRANG CHỦ GITHUB CỦA BẠN ĐỂ ĐÁ VĂNG
+                window.location.href = "https://nguyen842-ai.github.io/Summary-report-wet-market-project.2026/"; 
+                return;
+            }
+
+            // Tiến hành tải file từ Supabase Bucket
+            await loadDataScripts();
+            
+            // Chạy logic khởi tạo báo cáo
+            init();
+
+            // Ẩn màn hình loading đi
+            const loadScreen = document.getElementById('loading-screen');
+            loadScreen.style.opacity = '0';
+            setTimeout(() => {
+                loadScreen.style.display = 'none';
+                document.getElementById('main-container').style.display = 'block';
+            }, 500);
+        });
+
+
+        // CÁC BIẾN & HÀM LOGIC CỦA BÁO CÁO (GIỮ NGUYÊN)
         let districtUniverse = {}; 
         let charts = {};
         
-        // Biến toàn cục để lưu trữ dữ liệu xuất Excel
         let currentDetailData = [];
         let currentGlobalMonths = [];
         let currentLatestMonthName = "";
 
-        // =========================================================
-        // 1. TỪ ĐIỂN ĐA NGÔN NGỮ & CONFIG CƠ BẢN
-        // =========================================================
         const dict = {
             vi: {
-                sysTitle: "Tracking Sell Out Tuyến Chợ", sysSub: "Hệ thống báo cáo hiệu suất bán hàng, đối chiếu MCP độc lập",
+                sysTitle: "Tracking Sell Out Tuyến Chợ", sysSub: "Hệ thống báo cáo hiệu suất bán hàng, đối chiếu danh mục tuyến MCP",
                 fMonth: "Tháng", fWeek: "Tuần", fRegion: "Miền", fArea: "Khu vực", optAll: "Tất cả",
                 tabSummary: "Tổng Hợp Báo Cáo", tabDetails: "Chi Tiết Bao Phủ Chợ", btnExport: "Tải Excel Chi Tiết",
                 lblKae: "TẤT CẢ NHÂN VIÊN",
-                kpiSales: "TỔNG DOANH SỐ", kpiSalesSub: "VNĐ (Chưa VAT)", 
-                kpiTotal: "TỔNG KH TRÊN TUYẾN", kpiTotalSub: "khách hàng", kpiActive: "KHÁCH ACTIVE", kpiActiveSub: "khách hàng", 
+                kpiSales: "DOANH SỐ", kpiSalesSub: "VNĐ (Chưa VAT)", 
+                kpiTotal: "TỔNG KH TRÊN TUYẾN", kpiTotalSub: "khách hàng", kpiActive: "KH ACTIVE", kpiActiveSub: "khách hàng", 
                 kpiStrike: "STRIKE RATE", kpiStrikeSub: "Tỷ lệ KH Active / Tổng",
                 titleDaily: "Daily Tracking", badgeDaily: "Tuyến: MCP Gốc | Tổng: Lọc trùng toàn tuần",
                 titleWeekly: "Weekly Tracking", badgeWeekly: "Tổng Tháng: Lọc trùng khớp 100% với Monthly",
@@ -547,9 +621,6 @@
             return { id: "kh", name: "Sản phẩm Khác", color: "#94a3b8" }; 
         };
 
-        // =========================================================
-        // 2. LOGIC TABS & UI UX
-        // =========================================================
         function switchTab(tabId) {
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 if(!btn.classList.contains('btn-export')) btn.classList.remove('active');
@@ -672,9 +743,6 @@
             document.getElementById("kaeList").innerHTML = kaeHtml;
         }
 
-        // =========================================================
-        // Hàm xử lý tải Excel cho Tab 2
-        // =========================================================
         function exportTab2CSV() {
             if (!currentDetailData || currentDetailData.length === 0) {
                 alert(t('noData'));
@@ -686,7 +754,6 @@
             let headers = [t('colDistrict'), t('colMarket')];
             currentGlobalMonths.forEach(m => headers.push(formatM(m)));
             
-            // Cập nhật Header khớp với logic hiển thị tháng mới nhất
             headers.push(
                 t('colTotalS'), 
                 `${t('colActOutlet')} (${currentLatestMonthName})`, 
@@ -723,9 +790,6 @@
             document.body.removeChild(link);
         }
 
-        // =========================================================
-        // 3. LOGIC XỬ LÝ TABLE & ENGINE PHÂN TÍCH
-        // =========================================================
         function renderDashboard() {
             if (dbMaster.length === 0 && dbSales.length === 0) return; 
 
@@ -1197,14 +1261,17 @@
         }
 
         // =========================================================
-        // 4. KHỞI TẠO HỆ THỐNG
+        // 4. HÀM GOM DỮ LIỆU ĐÃ ĐƯỢC CẬP NHẬT ĐỂ QUÉT TỪ dataM1 ĐẾN dataM12
         // =========================================================
         function init() {
-            dbMaster = []; dbSales = [];
-            if (typeof dbMasterM5 !== 'undefined') dbMaster = dbMaster.concat(dbMasterM5);
-            if (typeof dbSalesM5 !== 'undefined')  dbSales  = dbSales.concat(dbSalesM5);
-            if (typeof dbMasterM6 !== 'undefined') dbMaster = dbMaster.concat(dbMasterM6);
-            if (typeof dbSalesM6 !== 'undefined')  dbSales  = dbSales.concat(dbSalesM6);
+            dbMaster = []; 
+            dbSales = [];
+            
+            // Quét tự động các file JS đã tải từ Supabase (từ 1 đến 12)
+            for (let i = 1; i <= 12; i++) {
+                if (typeof window['dbMasterM' + i] !== 'undefined') dbMaster = dbMaster.concat(window['dbMasterM' + i]);
+                if (typeof window['dbSalesM' + i] !== 'undefined')  dbSales  = dbSales.concat(window['dbSalesM' + i]);
+            }
 
             if (typeof dbMarket !== 'undefined') {
                 Object.keys(dbMarket).forEach(key => {
@@ -1219,7 +1286,6 @@
             setLang('vi'); 
         }
 
-        window.onload = init;
     </script>
 </body>
 </html>
