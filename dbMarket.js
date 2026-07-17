@@ -863,6 +863,7 @@ const dbMarket = {
 "4. Eastern_Chợ Trảng Dài": { di: "Biên Hòa", ec: 55 },
 "4. Eastern_Chợ Việt Giai": { di: "Trảng Bom", ec: 6 },
 "4. Eastern_Tạp Hóa-Biên Hòa": { di: "Biên Hòa", ec: 1 },
-
+"4. Eastern_Tạp Hóa- Long Thành": { di: "Long Thành", ec: 1 },
+"4. Eastern_Tạp Hóa-Vĩnh Cửu": { di: "Vĩnh Cửu", ec: 1 },
 
 };
