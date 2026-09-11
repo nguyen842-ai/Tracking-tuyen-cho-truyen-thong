@@ -603,14 +603,14 @@
         };
 
         const checkActiveWeek = (rtype, week) => {
-            if (!rtype) return true;
-            const r = String(rtype).toUpperCase().replace(/\s+/g, '');
-            const wStr = String(week).toUpperCase().trim();
-            if (r.includes('F4')) return true;
-            if (r.includes('F2-1') || r === 'F21') return wStr === 'W1' || wStr === 'W3';
-            if (r.includes('F2-2') || r === 'F22') return wStr === 'W2' || wStr === 'W4';
-            return true; 
-        };
+    if (!rtype) return true;
+    const r = String(rtype).toUpperCase().replace(/\s+/g, '');
+    const wStr = String(week).toUpperCase().trim();
+    if (r.includes('F4')) return true;
+    if (r.includes('F2-1') || r === 'F21') return wStr === 'W1' || wStr === 'W3' || wStr === 'W5';
+    if (r.includes('F2-2') || r === 'F22') return wStr === 'W0' || wStr === 'W2' || wStr === 'W4';
+    return true; 
+};
 
         const getSkuCategory = (skuName) => {
             let s = String(skuName).toLowerCase();
