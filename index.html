@@ -902,41 +902,60 @@
                 <tr style="font-weight:700; background-color:var(--primary-light);"><td class="first-col-sticky" style="background-color:var(--primary-light);">${t('rowSales')}</td>${targetMonths.map(m => `<td class="text-right">${monthObj[m].sales > 0 ? fmt(monthObj[m].sales) : '-'}</td>`).join('')}<td class="text-right" style="font-weight:700; background-color:var(--background); color:#000;">${totalSalesM > 0 ? fmt(totalSalesM) : '-'}</td></tr>
             `;
 
-            // ================== OVERVIEW ĐỊA BÀN ==================
+           // ================== OVERVIEW ĐỊA BÀN ==================
             let distMap = {};
-            
-            Object.keys(districtUniverse).forEach(k => { 
-                distMap[k] = { 
-                    minD: districtUniverse[k].minD, 
-                    cinD: districtUniverse[k].cinD, 
-                    mAct: new Set(), 
-                    oAct: new Set(), 
-                    sales: 0 
-                }; 
-            });
 
-            let plannedDistricts = new Set();
+            // 1. Quét fMaster (Kế hoạch đã lọc) để lấy danh sách chợ trên tuyến theo KAE/Area
             fMaster.forEach(r => {
-                let info = getMarketInfo(r.ar, r.m); 
-                let dist = info ? info.di : 'Chưa Rõ';
-                plannedDistricts.add(dist);
+                let info = getMarketInfo(r.ar, r.m);
+                let dist = info ? (info.di || 'Chưa Rõ') : 'Chưa Rõ';
+
+                if (!distMap[dist]) {
+                    distMap[dist] = { minD_set: new Set(), cinD: 0, mAct: new Set(), oAct: new Set(), sales: 0 };
+                }
+                
+                // Lưu lại key của chợ để đếm Estimate Outlet (ec) từ dbMarket
+                if (r.m) {
+                    let marketKey = (r.ar + "_" + r.m).toLowerCase();
+                    distMap[dist].minD_set.add(marketKey);
+                }
             });
 
+            // 2. Tính minD (số chợ trên tuyến) và cinD (số outlet estimate) chuẩn xác cho KAE này
+            Object.keys(distMap).forEach(dist => {
+                let dInfo = distMap[dist];
+                dInfo.minD = dInfo.minD_set.size;
+                dInfo.minD_set.forEach(mk => {
+                    let mkInfo = normalizedDbMarket[mk];
+                    if (mkInfo && mkInfo.ec) {
+                        dInfo.cinD += Number(mkInfo.ec);
+                    }
+                });
+            });
+
+            // 3. Quét fSales (Thực tế đã lọc) để đếm Active & Sales
             fSales.forEach(r => {
-                let info = getMarketInfo(r.ar, r.m); 
-                let dist = info ? info.di : 'Chưa Rõ';
-                if (!distMap[dist]) distMap[dist] = { minD: 0, cinD: 0, mAct: new Set(), oAct: new Set(), sales: 0 };
+                let info = getMarketInfo(r.ar, r.m);
+                let dist = info ? (info.di || 'Chưa Rõ') : 'Chưa Rõ';
+
+                if (!distMap[dist]) {
+                    // Nếu phát sinh sales ở vùng không có trong kế hoạch (tuyến ngoài)
+                    distMap[dist] = { minD: 0, cinD: 0, mAct: new Set(), oAct: new Set(), sales: 0 };
+                }
+
                 if (r.m) distMap[dist].mAct.add(r.m);
                 if (r.cc) distMap[dist].oAct.add(r.cc);
                 distMap[dist].sales += Number(r.s || 0);
             });
 
+            // 4. Lọc ra các District thực sự có dữ liệu và sort theo Sales
             let distArray = Object.keys(distMap)
                 .map(k => ({ dist: k, ...distMap[k] }))
-                .filter(d => plannedDistricts.has(d.dist) || d.mAct.size > 0 || d.sales > 0);
+                .filter(d => d.minD > 0 || d.mAct.size > 0 || d.sales > 0);
                 
             distArray.sort((a,b) => b.sales - a.sales);
 
+            // 5. Render ra View
             document.getElementById('tb-overview').innerHTML = distArray.length === 0 ? `<tr><td colspan="8" class="empty-row">${t('noData')}</td></tr>` : distArray.map(d => `
                 <tr>
                     <td class="first-col-sticky" style="font-weight:600;">${d.dist}</td>
