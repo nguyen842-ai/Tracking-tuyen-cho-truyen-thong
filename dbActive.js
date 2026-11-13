@@ -10,5 +10,5 @@ const dbActive = [
 {hq:"1.South", ar: "4. Eastern", k: "KAE Nguyễn Hùng Quốc",ac: "❌"},
 {hq:"1.South", ar: "4. Eastern", k: "KAE Phạm Thị Huyền Trang",ac: "❌"},
 {hq:"1.South", ar: "4. Eastern", k: "KAE Vũ Bảo Vương",ac: "✔️"},
-{hq:"2.North", ar: "1. Ha Noi", k: "KAE Trần Xuân Hòa",ac: "❌"},
+{hq:"2.North", ar: "1. Ha Noi", k: "KAE Trần Xuân Hòa",ac: "✔️"},
 ];
